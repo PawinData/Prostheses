@@ -1,0 +1,115 @@
+---
+title: 'Case Study: Prostheses'
+author: "Ariel Liang"
+date: "2020???3???18???"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r import data, include=TRUE}
+# import data from Google Drive
+DATA <- read.delim("https://drive.google.com/uc?export=download&id=1crOKACRchddn5d7vV5aeASGAKuIw5diq", header=TRUE, sep="", dec=".")
+```
+
+
+```{r NA values, include=TRUE}
+n_patient <- max(DATA$ID)
+
+# define a function that look beforehead if come across NA values
+pre_val <- function(vector, location)
+{
+  if (is.na(vector[location]))
+  {
+    return(pre_val(vector, location-1))
+  } else
+  {
+    return(vector[location])
+  }
+}
+
+# define a function that look afterhead if come across NA values
+post_val <- function(vector, location)
+{
+  if (is.na(vector[location]))
+  {
+    if (location<length(vector))
+    {
+      return(post_val(vector, location+1))
+    } else
+    {
+      return(pre_val(vector, location-1))
+    }
+  } else
+  {
+    return(vector[location])
+  }
+}
+
+# substitute NA values with recent obs of the same patient
+for (id in 1:n_patient)
+{
+  # extract patient data one by one
+  data <- DATA[DATA$ID==id,]
+  # operate while there're NA values
+  if (sum(as.numeric(is.na(data$nMTPM)))>0)
+  {
+    row_na_list <- which(is.na(data$nMTPM))
+    for (row_na in row_na_list)
+    {
+      if (row_na==1)
+      {
+        # if the 1st obs is missing, substitute with subsequent values
+        data$nMTPM[row_na] <- post_val(data$nMTPM, row_na + 1)
+      } 
+      else if (row_na==dim(data)[1])
+      {
+        # if the last obs is missing, substitute with previous values
+        data$nMTPM[row_na] <- pre_val(data$nMTPM, row_na - 1)
+      }
+      else 
+      {
+        # in other cases, substitue NA with the average of recent obs
+        data$nMTPM[row_na] <- post_val(data$nMTPM, row_na + 1) +
+          pre_val(data$nMTPM, row_na - 1)
+        data$nMTPM[row_na] <- data$nMTPM[row_na]/2
+        }
+    }
+  }
+  DATA <- rbind(DATA,data)
+}
+
+# check if there're any more NA values
+k_row <- dim(DATA)[1]
+data <- DATA[(k_row/2+1):k_row,]
+if (sum(as.numeric(is.na(data)))==0)
+{
+  DATA <- data
+  save(DATA, file="prostheses.RData")
+  head(DATA)
+} else
+{
+  print("clean the data again.")
+}
+
+# remove redundant variables
+rm(data,id,k_row,row_na)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r , include=TRUE}
+load("prostheses.RData")
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
