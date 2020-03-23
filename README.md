@@ -6,3 +6,9 @@ This is the course project for Mixed & Longitudinal Modeling (Spring 2020) at In
 Prostheses-2020.txt: the raw data file with missing values
 
 prostheses.RData: cleaned dataset with missing values substituted with local averages
+
+Prostheses_Roula.pdf: Instruction of Case Study
+
+functions.R: pre_val() and post_val()
+
+Prostheses.Rmd: code and report
