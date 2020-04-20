@@ -1,0 +1,45 @@
+```{r , include=TRUE}
+load("prostheses.RData")
+```
+
+
+```{r}
+DATA
+library(lattice)
+```
+
+
+```{r}
+#add Month.f and Type.f as factor 
+DATA$Month.f <- factor(DATA$FU.Months, levels = c(0,3,12,24,60))
+DATA$Type.f <- factor(DATA$Type, levels = c(1,2))
+
+```
+
+```{r}
+xyplot(nMTPM ~ Month.f , groups =ID, data = DATA, xlab = "Month", ylab = "MTPM", type = "l")
+
+xyplot(nMTPM ~ Month.f | Type.f, groups =ID, data = DATA, xlab = "Month", ylab = "MTPM", type = "l")
+
+xyplot(nMTPM ~ Month.f | Type.f, groups =ID, data = DATA, xlab = "Month", ylab = "MTPM", type = "l", panel = function(x, y) {
+ panel.average(x, y, horizontal = FALSE, col = "blue")
+ })
+```
+
+```{r}
+
+library(tidyverse)
+library(GGally)
+
+########## Age
+p <- ggplot(data = DATA, aes(x = Age, y = nMTPM)) + geom_point( col = "darkblue", alpha = .15)
+
+p+geom_smooth(method = lm )
+############## BMI
+p1 <- ggplot(data = DATA, aes(x = BMI, y = nMTPM)) + geom_point( col = "darkblue", alpha = .15)
+p1 + geom_smooth(method = lm )
+
+# Sex
+plot(nMTPM ~ Sex , data = DATA, type = "l", groups = ID)
+
+```
