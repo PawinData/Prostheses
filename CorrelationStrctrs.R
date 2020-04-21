@@ -48,7 +48,7 @@ model5 <- gls(nMTPM ~ Month.f*Type,
 
 model6 <- gls(nMTPM ~ Month.f*Type,
               data = DATA,
-              correlation = corExp(form = ~ 1 | ID),
+              correlation = corExp(form = ~ FU.Months | ID),
               na.action = na.exclude, method = "REML")
 
 #Compare 
