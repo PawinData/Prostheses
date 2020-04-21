@@ -1,0 +1,107 @@
+---
+title: "Prothesis Question 1"
+author: "Yuxuan LI, Ariel Liang, Yuying TAN, María Zilli "
+date: "May 1st, 2020"
+fontsize: 12pt
+output:
+  html_document:
+    df_print: paged
+---
+```{r , include=TRUE}
+load("prostheses.RData")
+```
+
+```{r}
+DATA
+require(pacman)
+p_load(lattice, tidyverse, GGally)
+```
+## Summary of Data
+```{r DATA}
+summary(DATA)
+str(DATA)
+```
+
+From the summary we can see that the average age is of patient is of 66.22 years old, with the youngest of 35.6 and the olders is of 80.23; the average Body Mass Index is of 28.32 (lowest 21.20 and max 38.34).There are 160 females and 140 males in the data. 
+
+```{r}
+#add Month.f and Type.f as factor 
+DATA$Month.f <- factor(DATA$FU.Months, levels = c(0,3,12,24,60))
+DATA$Type.f <- factor(DATA$Type, levels = c(1,2))
+```
+
+## Plots for Mean Structure and Data exploration 
+
+The following section intends to describe the data, and use graphical techniques to explore the mean structure, the variance structure and the correlation structure. 
+
+**Mean per prothesis type and month** 
+```{r}
+with(DATA, tapply(nMTPM, list(Month.f, Type), mean, na.rm=TRUE))
+```
+The means for the Maximum Total Point Motion both increase with both types of prothesis, but the change in mean is larger for type 2. 
+
+**Variance per prothesis type and month** 
+```{r}
+with(DATA, tapply(nMTPM, list(Month.f, Type), var, na.rm=TRUE))
+```
+
+
+**Plot for individual profiles** 
+
+
+```{r, echo=FALSE}
+xyplot(nMTPM ~ Month.f , groups =ID, data = DATA, xlab = "Month", ylab = "MTPM(mm) ", type = "l")
+```
+
+Plot of individual profiles shows an increase in MTPM for almost all individuals from baseline (first day after the cirgury) to 3 months after the operation, after the 3 months we see a fairly continuos trend. 
+However, some outliers appear in the graph, particularly individuals which show a great increase in mobility throughout the months and others which show a decerase in mobility. 
+
+**Plot showing individual profiles per type of prothesis** 
+```{r, echo=FALSE}
+xyplot(nMTPM ~ Month.f | Type.f, groups =ID, data = DATA, xlab = "Month", ylab = "MTPM (mm)", type = "l")
+```
+
+For the type 2 we see a steep increase in MTPM 3 months after the cirgury. After the three months more steady however differences in individual profiles.For type 1 there is a slower increase in the profiles and more diverse MTPM. 
+
+**Plot for mean MTPM for each type and period, for both types the MTPM increase**
+```{r, echo=FALSE}
+xyplot(nMTPM ~ Month.f | Type.f, groups =ID, data = DATA, xlab = "Month", ylab = "MTPM (mm)", type = "l", panel = function(x, y) {
+  panel.average(x, y, horizontal = FALSE, col = "blue")
+})
+```
+
+The mean shows a steapear increase for type 2 than type 1. 
+
+
+**Age vs. MTPM**
+```{r}
+p <- ggplot(data = DATA, aes(x = Age, y = nMTPM)) + geom_point( col = "darkblue", alpha = .15)
+p+geom_smooth(method = lm )
+```
+
+
+
+**Body Mas Index vs MTPM** 
+```{r}
+p1 <- ggplot(data = DATA, aes(x = BMI, y = nMTPM)) + geom_point( col = "darkblue", alpha = .15)
+p1 + geom_smooth(method = lm )
+```
+
+**Sex vs.MTPM** 
+```{r}
+plot(nMTPM ~ Sex , data = DATA, type = "l", groups = ID)
+```
+
+**Plot per type**
+```{r}
+m <- ggplot(DATA, aes( x = Month.f, y=nMTPM , group= ID )) 
+m + geom_point(aes(colour= Type.f)) 
+```
+
+**Plot per Sex and Type**
+```{r}
+m + geom_point(aes(colour= Type.f)) + facet_grid(.~Sex) 
+```
+
+##Conclusions
+
