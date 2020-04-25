@@ -179,3 +179,36 @@ plot(model17, resid(., type="n") ~ fitted(.),type = c("p", "smooth"), lwd = 3)
 plot(model17, resid(., type="n") ~ fitted(.)|Type,type = c("p", "smooth"), lwd = 3)
 
 #the variance is not constant
+
+
+################ Q3 
+
+# Consider individuals as random 
+# Linear mixed effects model 
+model.1 <- lme(lnMTPM ~ Age*Sex+Month.f*Type.f+Sex*BMI+Sex*Month.f, 
+               random = ~1|ID,
+               data = DATA)
+summary(model.1)
+anova(model.1)
+
+# Exclude Age 
+model.2 <- update(model.1, .~.-Age)
+summary(model.2)
+anova(model.2)
+
+getVarCov(model.2)
+
+#Between subject variation 
+bs <- getVarCov(model.2, type = "random.effects")  [1] #check 
+
+#Within subject variation 
+ws <- getVarCov(model.2, type ="conditional")[[1]][1,1] #check
+
+# Marginal cov matrix 
+getVarCov(model.2, type = "marginal", ind = 2)
+
+#Intraclass correlation coefficient of reliability
+reliab.coeficcient <- bs/(bs + ws)
+reliab.coeficcient
+
+
