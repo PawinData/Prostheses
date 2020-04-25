@@ -1,35 +1,3 @@
----
-title: "Prothesis Question 1"
-author: "Yuxuan LI, Ariel Liang, Yuying TAN, María Zilli "
-date: "May 1st, 2020"
-fontsize: 12pt
-output:
-  html_document:
-    df_print: paged
----
-```{r , include=TRUE}
-load("prostheses.RData")
-```
-
-```{r}
-DATA
-require(pacman)
-p_load(lattice, tidyverse, GGally)
-```
-## Summary of Data
-```{r DATA}
-summary(DATA)
-str(DATA)
-```
-
-From the summary we can see that the average age is of patient is of 66.22 years old, with the youngest of 35.6 and the olders is of 80.23; the average Body Mass Index is of 28.32 (lowest 21.20 and max 38.34).There are 160 females and 140 males in the data. 
-
-```{r}
-#add Month.f and Type.f as factor 
-DATA$Month.f <- factor(DATA$FU.Months, levels = c(0,3,12,24,60))
-DATA$Type.f <- factor(DATA$Type, levels = c(1,2))
-```
-
 ## Plots for Mean Structure and Data exploration 
 
 The following section intends to describe the data, and use graphical techniques to explore the mean structure, the variance structure and the correlation structure. 
@@ -102,6 +70,24 @@ m + geom_point(aes(colour= Type.f))
 ```{r}
 m + geom_point(aes(colour= Type.f)) + facet_grid(.~Sex) 
 ```
+```{r}
+#interaction between Sex and Age
+p2 <- ggplot(data = DATA, aes(x = Age, y = nMTPM,fill = Sex)) + geom_point( col = "darkblue", alpha = .15)
+
+p2+geom_smooth(method = lm )
+
+
+#interaction between BMI and Age
+p3 <- ggplot(data = DATA, aes(x = BMI, y = nMTPM,fill = Sex)) + geom_point( col = "darkblue", alpha = .15)
+
+p3+geom_smooth(method = lm )
+#interaction between Sex and nMTPM
+p4 <- ggplot(data = DATA, aes(x = FU.Months, y = nMTPM,fill = Sex)) + geom_point( col = "darkblue", alpha = .15)
+
+p4+geom_smooth(method = lm )
+```
+
 
 ##Conclusions
+
 
