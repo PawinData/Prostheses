@@ -1,6 +1,6 @@
 ---
 title: 'Case Study: Prostheses'
-author: "Yuxuan LI, Ariel Liang, Yuying TAN, "
+author: "Yuxuan LI, Ariel Liang, Yuying TAN, María Zilli "
 date: "March 18, 2020"
 fontsize: 12pt
 header-includes:
@@ -8,7 +8,7 @@ header-includes:
 - \usepackage{lipsum}
 - \pagestyle{fancy}
 - \fancyhead{}
-- \fancyhead[CO,CE]{LIANG(s2614693), LI(s2485265), TAN(s2586401)}
+- \fancyhead[CO,CE]{LIANG(s2614693), LI(s2485265), TAN(s2586401), Zilli(s2261030}
 geometry: margin=0.8in
 output: 
   pdf_document
