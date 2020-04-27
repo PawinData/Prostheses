@@ -23,7 +23,9 @@ anova(model1,model2)
 #Add explanation for 
 ###################################################################
 
-#2.Select a correlation structure
+#2.Select a correlation structure (same mean model but different covariance structures,
+# the following models try compound symmetry, continuos ARI, linear Gaussian and constant variance in time 
+
 model3 <- gls(nMTPM ~ Age*Sex+Month.f*Type.f+Sex*BMI+Sex*Month.f,
               data = DATA,
               correlation = corSymm(form = ~ 1 | ID),
@@ -68,7 +70,7 @@ anova(model4,model5, model6, model7, model8)
 
 
 ################################
-##correlation structures + heteroscedastic errors
+## Extension of the correlation structures by assumption of heteroscedastic errors 
 
 model9 <- gls(nMTPM ~ Age*Sex+Month.f*Type.f+Sex*BMI+Sex*Month.f,
               data = DATA,
@@ -112,7 +114,7 @@ anova(model9, model10, model11, model12, model13)
 
 ##We can compare model 4 and model 9 
 anova(model9, model4)
-##model 9 gives the lowest AIC & BIC so we proceed with model 9 
+##model 9 gives the lowest AIC & BIC so we proceed with model 9, *add more explanation for model chosen 
 
 
 #######################################################
@@ -169,9 +171,7 @@ summary(model18)
 anova(model18)
 
 # Regression coefficient interpretation: 
-betas <- coef(model17) #Parameter estimates
-V <- vcov(model17) #var cov matrix 
-#contrast matrix ?
+
 
 
 ############################################################
