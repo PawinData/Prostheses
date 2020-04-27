@@ -169,6 +169,10 @@ summary(model18)
 anova(model18)
 
 # Regression coefficient interpretation: 
+betas <- coef(model17) #Parameter estimates
+V <- vcov(model17) #var cov matrix 
+#contrast matrix ?
+
 
 ############################################################
 #residual plots
