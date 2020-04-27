@@ -168,6 +168,8 @@ model18 <- gls(lnMTPM ~ Month.f*Type.f+Sex*Month.f-Sex,
 summary(model18)
 anova(model18)
 
+# Regression coefficient interpretation: 
+
 ############################################################
 #residual plots
 plot(model17, resid(., type = "p") ~ fitted(.),type = c("p", "smooth"), lwd = 3)
