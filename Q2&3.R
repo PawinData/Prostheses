@@ -255,4 +255,38 @@ reliab.coeficcient <- bs/(bs + ws)
 reliab.coeficcient
 
 #residual plots 
+#########just updated  #######################################################################################################################
+model.5 <- lme(nMTPM ~ Month.f*Type.f+Sex*BMI+Sex*Month.f, 
+               random = ~1|ID,
+               data = DATA)
+summary(model.5)
+anova(model.5)
+#remove interaction between Sex and BMI
+model.6 <- lme(nMTPM ~ Month.f*Type.f+BMI+Sex*Month.f, 
+               random = ~1|ID,
+               data = DATA)
+summary(model.6)
+anova(model.6)
+
+
+############ I wonder whether we should use "FU.Months""Type" or "Month.f""Type.f", so I tried with "FU.Months""Type".
+model.7 <- lme(nMTPM ~ FU.Months*Type+BMI+Sex*FU.Months, 
+               random = ~1|ID,
+               data = DATA)
+summary(model.7)
+anova(model.7)#####from the residual plot, I think it works better than "Month.f""Type.f".
+
+#remove interaction between FU.Months and Type
+model.8 <- lme(nMTPM ~ FU.Months+Type+BMI+Sex*FU.Months, 
+               random = ~1|ID,
+               data = DATA)
+
+model.9 <- lme(nMTPM ~ FU.Months+Type+BMI+Sex*FU.Months, 
+                random = ~1|ID,
+                weights = varIdent(form = ~ 1 | FU.Months),,
+                data = DATA)
+anova(model.6, model.9) #model.9 is better
+
+plot(model.6, resid(., type = "p") ~ fitted(.),type = c("p", "smooth"), lwd = 3)
+plot(model.8, resid(., type = "p") ~ fitted(.),type = c("p", "smooth"), lwd = 3)
 
