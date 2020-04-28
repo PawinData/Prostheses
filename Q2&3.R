@@ -1,3 +1,4 @@
+# Q.2 
 #1.Consider an elaborate model for the mean response. From the EDA, we consider 
 # a structure below for now. And we will choose between Unstructured model  and (Semi-) Parametric model. 
 
@@ -170,8 +171,30 @@ model18 <- gls(lnMTPM ~ Month.f*Type.f+Sex*Month.f-Sex,
 summary(model18)
 anova(model18)
 
-# Regression coefficient interpretation: 
+#Should we consider this transformation? I run some of the graphs from the mean part and it doesn't seem to change a lot...
 
+# Regression coefficient interpretation (from model 17) 
+
+# (Intercept): mean migration measured by the MTMP at baseline (first day after surgery) for type 1 protheses group 
+# Month.f3: change in mean MTMP for 3 months postoperation for type 1 protheses group   
+# Month.f12: change in mean MTMP for 1 year postoperation for type 1 protheses group 
+# Month.f24: change in mean MTMP for 2 years postoperation for type 1 protheses group 
+# Month.f60: change in mean MTMP for 5 years postoperation for type 1 protheses group 
+# Type.f2: difference in mean MTMP between type 1 group and type 2 group at baseline
+# Month.f3:Type.f2: difference in rate of change in mean MTMP between type 1 and type 2, 3 months postoperation 
+# Month.f12:Type.f2: difference in rate of change in mean MTMP between type 1 and type 2, 1 year postoperation 
+# Month.f24:Type.f2: difference in rate of change in mean MTMP between type 1 and type 2, 2 years postoperation 
+# Month.f60:Type.f2: difference in rate of change in mean MTMP between type 1 and type 2, 5 years postoperation 
+
+# ¿? unsure about the interpretation of the following, is it difference in rate chanfe in mean MTMP for males for type 1? 
+
+# Month.f0:SexMale    
+# Month.f3:SexMale 
+# Month.f12:SexMale 
+# Month.f24:SexMale
+# Month.f60:SexMale
+
+# 
 
 
 ############################################################
