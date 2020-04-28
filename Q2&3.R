@@ -194,7 +194,9 @@ anova(model18)
 # Month.f24:SexMale
 # Month.f60:SexMale
 
-# 
+# Intervals for 95% confidence level 
+
+intervals(model17)
 
 
 ############################################################
