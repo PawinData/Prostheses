@@ -215,31 +215,44 @@ plot(model17, resid(., type="n") ~ fitted(.)|Type,type = c("p", "smooth"), lwd =
 ################ Q3 
 
 # Consider individuals as random 
-# Linear mixed effects model 
-model.1 <- lme(lnMTPM ~ Age*Sex+Month.f*Type.f+Sex*BMI+Sex*Month.f, 
+# Linear mixed effects models
+
+#Model with only types
+model.1 <- lme(nMTPM ~ Type.f, random = ~1|ID,
+               data = DATA)
+
+#Model with only types and time 
+model.2 <- lme(nMTPM ~ Month.f*Type.f, random = ~1|ID,
+               data = DATA)
+
+summary(model.2)
+
+# Model with types and time, sex, age, bmi 
+model.3 <- lme(lnMTPM ~ Age*Sex+Month.f*Type.f+Sex*BMI+Sex*Month.f, 
                random = ~1|ID,
                data = DATA)
-summary(model.1)
-anova(model.1)
+summary(model.3)
+anova(model.3)
 
 # Exclude Age 
-model.2 <- update(model.1, .~.-Age)
-summary(model.2)
-anova(model.2)
+model.4 <- update(model.3, .~.-Age)
+summary(model.4)
+anova(model.4)
 
-getVarCov(model.2)
+getVarCov(model.4)
 
 #Between subject variation 
-bs <- getVarCov(model.2, type = "random.effects")  [1] #check 
+bs <- getVarCov(model.4, type = "random.effects")  [1] #check 
 
 #Within subject variation 
-ws <- getVarCov(model.2, type ="conditional")[[1]][1,1] #check
+ws <- getVarCov(model.4, type ="conditional")[[1]][1,1] #check
 
 # Marginal cov matrix 
-getVarCov(model.2, type = "marginal", ind = 2)
+getVarCov(model.4, type = "marginal", ind = 2)
 
 #Intraclass correlation coefficient of reliability
 reliab.coeficcient <- bs/(bs + ws)
 reliab.coeficcient
 
+#residual plots 
 
