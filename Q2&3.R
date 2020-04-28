@@ -132,8 +132,8 @@ anova(model14)
 
 model15 <- gls(nMTPM ~ Month.f*Type.f+Sex*BMI+Sex*Month.f,
                data = DATA,
-               correlation = corExp(form = ~ FU.Months | ID),
-               weights =  corCompSymm(form = ~ FU.Months),
+               correlation = corCompSymm(form = ~ FU.Months | ID),
+               weights =  varExp(form = ~ FU.Months),
                na.action = na.exclude, method = "REML")
 
 summary(model15)
