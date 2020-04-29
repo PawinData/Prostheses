@@ -200,14 +200,19 @@ intervals(model17)
 
 
 ############################################################
-#residual plots
+#Residual plots
+
+#Standarized residuals 
 plot(model17, resid(., type = "p") ~ fitted(.),type = c("p", "smooth"), lwd = 3)
 
-plot(model17, resid(., type="p") ~ fitted(.)|Type,type = c("p", "smooth"), lwd = 3)
+#Standarized residuals per type 
+plot(model17, resid(., type="p") ~ fitted(.)|Type.f,type = c("p", "smooth"), lwd = 3)
 
+#Normalized residuals 
 plot(model17, resid(., type="n") ~ fitted(.),type = c("p", "smooth"), lwd = 3)
 
-plot(model17, resid(., type="n") ~ fitted(.)|Type,type = c("p", "smooth"), lwd = 3)
+#Normalized residuals
+plot(model17, resid(., type="n") ~ fitted(.)|Type.f,type = c("p", "smooth"), lwd = 3)
 
 #the variance is not constant
 
@@ -242,10 +247,10 @@ anova(model.4)
 getVarCov(model.4)
 
 #Between subject variation 
-bs <- getVarCov(model.4, type = "random.effects")  [1] #check 
+bs <- getVarCov(model.4, type = "random.effects")  [1] #please check because i am not sure about this 
 
 #Within subject variation 
-ws <- getVarCov(model.4, type ="conditional")[[1]][1,1] #check
+ws <- getVarCov(model.4, type ="conditional")[[1]][1,1] #please check because i am not sure about this  
 
 # Marginal cov matrix 
 getVarCov(model.4, type = "marginal", ind = 2)
@@ -295,4 +300,6 @@ plot(model.8, resid(., type = "p") ~ fitted(.),type = c("p", "smooth"), lwd = 3)
 plot(model.9, resid(., type="n") ~ fitted(.),type = c("p", "smooth"), lwd = 3)
 plot(model.9, resid(., type="n") ~ fitted(.)|Type,type = c("p", "smooth"), lwd = 3)
 
+#Check for normality 
+qqnorm(model.9, ~ resid(., type = "p"), abline = c(0, 1))
 
