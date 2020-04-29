@@ -254,7 +254,6 @@ getVarCov(model.4, type = "marginal", ind = 2)
 reliab.coeficcient <- bs/(bs + ws)
 reliab.coeficcient
 
-#residual plots 
 #########just updated  #######################################################################################################################
 model.5 <- lme(nMTPM ~ Month.f*Type.f+Sex*BMI+Sex*Month.f, 
                random = ~1|ID,
@@ -287,6 +286,13 @@ model.9 <- lme(nMTPM ~ FU.Months+Type+BMI+Sex*FU.Months,
                 data = DATA)
 anova(model.6, model.9) #model.9 is better
 
+#residual plots 
 plot(model.6, resid(., type = "p") ~ fitted(.),type = c("p", "smooth"), lwd = 3)
 plot(model.8, resid(., type = "p") ~ fitted(.),type = c("p", "smooth"), lwd = 3)
+
+
+#residual plots 
+plot(model.9, resid(., type="n") ~ fitted(.),type = c("p", "smooth"), lwd = 3)
+plot(model.9, resid(., type="n") ~ fitted(.)|Type,type = c("p", "smooth"), lwd = 3)
+
 
