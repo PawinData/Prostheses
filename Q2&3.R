@@ -198,6 +198,11 @@ anova(model18)
 
 intervals(model17)
 
+###Please check this interpretations 
+
+# The values taken at baseline show not significant change since the MTMP was measured 1 day after the operation 
+# The change in mean MTMP increases from month 3 to 60 months (5 years) after the operation for the prothesis type 1
+# The change in mean MTMP increase to month 3 and then decrease 
 
 ############################################################
 #Residual plots
