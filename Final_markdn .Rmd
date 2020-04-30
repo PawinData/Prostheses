@@ -1,7 +1,7 @@
 ---
 title: 'Case Study: Prostheses'
 author: 'Yuxuan LI (s2485265), Ariel Liang (s2614693), Yuying Tan (s2586401), María Zilli (s2261030)'
-date: "March 18, 2020"
+date: "May 1st, 2020"
 output:
   html_document
 geometry: margin=0.8in
