@@ -449,73 +449,81 @@ intervals(model17)
 * Consider individuals as random 
 
 ```{r}
-# Model with only protheses types
-model.1 <- lme(nMTPM ~ Type.f, random = ~1|ID,
-               data = DATA)
 
 #Model with only types and time 
-model.2 <- lme(nMTPM ~ Month.f*Type.f, random = ~1|ID,
+model.1 <- lme(nMTPM ~ Month.f*Type.f, random = ~1|ID,
                data = DATA)
 
 # Model with types and time, sex, age, bmi Month.f*Type.f+Sex*BMI+Sex*Month.f
-model.3 <- lme(nMTPM ~ Age*Sex+Month.f*Type.f+Sex*BMI+Sex*Month.f, 
+model.2 <- lme(nMTPM ~ Age*Sex+Month.f*Type.f+Sex*BMI+Sex*Month.f, 
                random = ~1|ID,
                data = DATA)
 
 # Exclude Age 
-model.4 <- update(model.3, .~.-Age)
-summary(model.4)
+model.3 <- update(model.2, .~.-Age)
+summary(model.3)
 
-model.5 <- lme(nMTPM ~ Month.f*Type.f+Sex*BMI+Sex*Month.f, 
+model.4 <- lme(nMTPM ~ Month.f*Type.f+Sex*BMI+Sex*Month.f, 
+               random = ~1|ID,
+               data = DATA)
+summary(model.4)
+anova(model.4)
+
+#remove interaction between Sex and BMI
+model.5 <- lme(nMTPM ~ Month.f*Type.f+BMI+Sex*Month.f, 
                random = ~1|ID,
                data = DATA)
 summary(model.5)
 anova(model.5)
 
-#remove interaction between Sex and BMI
-model.6 <- lme(nMTPM ~ Month.f*Type.f+BMI+Sex*Month.f, 
+##Check for the use of  "FU.Months""Type" or "Month.f""Type.f"
+
+model.6 <- lme(nMTPM ~ FU.Months*Type+BMI+Sex*FU.Months, 
                random = ~1|ID,
                data = DATA)
 summary(model.6)
 anova(model.6)
 
-##Check for the use of  "FU.Months""Type" or "Month.f""Type.f"
-
-model.7 <- lme(nMTPM ~ FU.Months*Type+BMI+Sex*FU.Months, 
-               random = ~1|ID,
-               data = DATA)
-summary(model.7)
-anova(model.7)
-
 ###from the residual plot and qqplot, I think it does not work better than "Month.f""Type.f".
 
 #remove interaction between FU.Months and Type
-model.8 <- lme(nMTPM ~ FU.Months+Type+BMI+Sex*FU.Months, 
+model.7 <- lme(nMTPM ~ FU.Months+Type+BMI+Sex*FU.Months, 
                random = ~1|ID,
                data = DATA)
 
-model.9 <- lme(nMTPM ~ FU.Months+Type+BMI+Sex*FU.Months, 
+model.8 <- lme(nMTPM ~ FU.Months+Type+BMI+Sex*FU.Months, 
                 random = ~1|ID,
                 weights = varIdent(form = ~ 1 | FU.Months),
                 data = DATA)
+                
+#uncorrelated random intercepts and random slopes model
+model.9 <- lme(nMTPM ~ FU.Months+Type+BMI+Sex*FU.Months, 
+                random = list(ID = pdDiag(form = ~ FU.Months)),
+                weights = varIdent(form = ~ 1 | FU.Months),
+                data = DATA)
+anova(model.9, model.8)
 
-model..6 <- update(model.6, method = "ML")
+model..5 <- update(model.5, method = "ML")
+model..8 <- update(model.8, method = "ML")
+anova(model..5,model..8) #model.5 is better
+
+model..5 <- update(model.5, method = "ML")
 model..9 <- update(model.9, method = "ML")
-anova(model..6,model..9) #model.6 is better
+anova(model..5,model..9) #model.5 is better
 ```
 
 **Between and within subject variation**
 ```{r}
-getVarCov(model..6)
+getVarCov(model..5)
 
 #Between subject variation 
-bs <- getVarCov(model..6, type = "random.effects")  [1] #please check because i am not sure about this 
+bs <- getVarCov(model..5, type = "random.effects")  [1] #please check because i am not sure about this 
 
 #Within subject variation 
-ws <- getVarCov(model..6, type ="conditional")[[1]][1,1] #please check because i am not sure about this  
+ws <- getVarCov(model..5, type ="conditional")[[1]][1,1] #please check because i am not sure about this  
 
 # Marginal cov matrix 
-getVarCov(model..6, type = "marginal", ind = 2)
+getVarCov(model..5, type = "marginal", ind = 2)
 
 #Intraclass correlation coefficient of reliability
 reliab.coeficcient <- bs/(bs + ws)
@@ -525,21 +533,21 @@ reliab.coeficcient
 
 ##Residual plots 
 ```{r}
-plot(model.6, resid(., type = "p") ~ fitted(.),type = c("p", "smooth"), lwd = 3)
-plot(model.8, resid(., type = "p") ~ fitted(.),type = c("p", "smooth"), lwd = 3)
+plot(model.5, resid(., type = "p") ~ fitted(.),type = c("p", "smooth"), lwd = 3)
+plot(model.7, resid(., type = "p") ~ fitted(.),type = c("p", "smooth"), lwd = 3)
 
 ``` 
 
 ```{r}
-plot(model.9, resid(., type="n") ~ fitted(.),type = c("p", "smooth"), lwd = 3)
-plot(model.9, resid(., type="n") ~ fitted(.)|Type.f,type = c("p", "smooth"), lwd = 3)
+plot(model.8, resid(., type="n") ~ fitted(.),type = c("p", "smooth"), lwd = 3)
+plot(model.8, resid(., type="n") ~ fitted(.)|Type.f,type = c("p", "smooth"), lwd = 3)
 ``` 
 
 **Check for normality**
 ```{r}
-qqnorm(model.9, ~ resid(., type = "p"), abline = c(0, 1))
-qqnorm(model.6, ~ resid(., type = "p"), abline = c(0, 1))
-# model.6 has better normality based on qqnorm 
+qqnorm(model.8, ~ resid(., type = "p"), abline = c(0, 1))
+qqnorm(model.5, ~ resid(., type = "p"), abline = c(0, 1))
+# model.5 has better normality based on qqnorm 
 ``` 
 
 
