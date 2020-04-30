@@ -283,7 +283,7 @@ model.7 <- lme(nMTPM ~ FU.Months*Type+BMI+Sex*FU.Months,
                random = ~1|ID,
                data = DATA)
 summary(model.7)
-anova(model.7)#####from the residual plot, I think it works better than "Month.f""Type.f".
+anova(model.7)#####from the residual plot and qqplot, I think it does not work better than "Month.f""Type.f".
 
 #remove interaction between FU.Months and Type
 model.8 <- lme(nMTPM ~ FU.Months+Type+BMI+Sex*FU.Months, 
@@ -294,7 +294,10 @@ model.9 <- lme(nMTPM ~ FU.Months+Type+BMI+Sex*FU.Months,
                 random = ~1|ID,
                 weights = varIdent(form = ~ 1 | FU.Months),,
                 data = DATA)
-anova(model.6, model.9) #model.9 is better
+
+model..6 <- update(model.6, method = "ML")
+model..9 <- update(model.9, method = "ML")
+anova(model..6,model..9) #model.6 is better
 
 #residual plots 
 plot(model.6, resid(., type = "p") ~ fitted(.),type = c("p", "smooth"), lwd = 3)
@@ -307,4 +310,5 @@ plot(model.9, resid(., type="n") ~ fitted(.)|Type,type = c("p", "smooth"), lwd =
 
 #Check for normality 
 qqnorm(model.9, ~ resid(., type = "p"), abline = c(0, 1))
+qqnorm(model.6, ~ resid(., type = "p"), abline = c(0, 1))
 
