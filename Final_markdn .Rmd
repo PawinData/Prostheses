@@ -12,7 +12,7 @@ The following
 Maximum Total Point Motion (MTPM)
 For data preparation see Anex 1. 
 
-The following libraries were used 
+
 ```{r}
 # define a function that look beforehead if come across NA values
 pre_val <- function(vector, location)
@@ -42,9 +42,68 @@ post_val <- function(vector, location)
   }
 }
 
-load("prostheses.rdata") 
+#load data
+#file. <- "..." # specify the directory with data
+DATA <- read.spss(file.path(file., "Prostheses-2020.txt"), to.data.frame = TRUE)
+
+#delete NA values
+n_patient <- max(DATA$ID)
+# substitute NA values with recent obs of the same patient
+for (id in 1:n_patient)
+{
+  # extract patient data one by one
+  data <- DATA[DATA$ID==id,]
+  # operate while there're NA values
+  if (sum(as.numeric(is.na(data$nMTPM)))>0)
+  {
+    row_na_list <- which(is.na(data$nMTPM))
+    for (row_na in row_na_list)
+    {
+      if (row_na==1)
+      {
+        # if the 1st obs is missing, substitute with subsequent values
+        data$nMTPM[row_na] <- post_val(data$nMTPM, row_na + 1)
+      } 
+      else if (row_na==dim(data)[1])
+      {
+        # if the last obs is missing, substitute with previous values
+        data$nMTPM[row_na] <- pre_val(data$nMTPM, row_na - 1)
+      }
+      else 
+      {
+        # in other cases, substitue NA with the average of recent obs
+        a <- pre_val(data$nMTPM, row_na - 1)
+        b <- post_val(data$nMTPM, row_na + 1)
+        data$nMTPM[row_na] <- (a+b)/2
+      }
+    }
+  }
+  DATA <- rbind(DATA,data)
+}
+# check if there're any more NA values
+k_row <- dim(DATA)[1]
+data <- DATA[(k_row/2+1):k_row,]
+if (sum(as.numeric(is.na(data)))==0)
+{
+  DATA <- data
+  save(DATA, file="prostheses.RData")
+  knitr::kable(DATA[1:10,], row.names=FALSE, align="lrcrcrrr", digits=4,
+               caption="Data of the First Two Patients")
+} else
+{
+  print("clean the data again.")
+}
+# remove redundant variables
+rm(data, id, k_row, row_na, row_na_list, a, b)
+```
+
+# you may load the workspace prostheses.RData in case the codes failed 
+load("prostheses.RData") 
 require(pacman)
-p_load(lattice, lme4, nlme, ggplot2)
+library(lattice)
+library(lme4)
+library(nlme)
+library(ggplot2)
 
 ```
 
@@ -344,39 +403,6 @@ summary(model17)
 anova(model17)
 ```
 
-**Regression coefficient interpretation (from model 17)**
-
-+ (Intercept): mean migration measured by the MTMP at baseline (first day after surgery) for type 1 protheses group 
-+ Month.f3: change in mean MTMP for 3 months postoperation for type 1 protheses group   
-+ Month.f12: change in mean MTMP for 1 year postoperation for type 1 protheses group 
-+ Month.f24: change in mean MTMP for 2 years postoperation for type 1 protheses group 
-+ Month.f60: change in mean MTMP for 5 years postoperation for type 1 protheses group 
-+ Type.f2: difference in mean MTMP between type 1 group and type 2 group at baseline
-+ Month.f3:Type.f2: difference in rate of change in mean MTMP between type 1 and type 2, 3 months postoperation 
-+ Month.f12:Type.f2: difference in rate of change in mean MTMP between type 1 and type 2, 1 year postoperation 
-+ Month.f24:Type.f2: difference in rate of change in mean MTMP between type 1 and type 2, 2 years postoperation 
-+ Month.f60:Type.f2: difference in rate of change in mean MTMP between type 1 and type 2, 5 years postoperation 
-
-*Please check this interpretations 
-*¿? unsure about the interpretation of the following, is it difference in rate chanfe in mean MTMP for males for type 1? Month.f0:SexMale    ; Month.f3:SexMale ; Month.f12:SexMale ; Month.f24:SexMale; Month.f60:SexMale
-
-**a) Do both types migrate similarly over time?**
-+ The values taken at baseline are not significant since the MTMP was measured 1 day after the operation,therefore there is no change.
-+ No, the protheses type do not migrate similarly over time. The mean change MTMP increases from month 3 to 60 months (5 years) after the operation for the prothesis type 1. While the mean MTMP for type 2 increases from baseline to 3 months, but it decreases from year 1 to year 5. 
-*is there a lot of data lost from the patients for type 2 for the last measurement? 
-
-**b) Report the differences in the mean migration between the two operation types at each time point**
-**Intervals for 95% confidence level**
-
-```{r}
-intervals(model17)
-```
-
-**c) Report the size of the migration change from 3 months to 1 year, 3 months to 2 years, 3 months to 5 years and change from 1 year to 5 year pero operation type and make statistical inference. Given the corresponding 95% confidence interval and p-value.**
-
-
-**d) Are these changes different between the two types? Give the corresponding 95% confidence interval and p-value**
-
 ##Residual plots
 
 **Standarized residuals**
@@ -400,6 +426,25 @@ plot(model17, resid(., type="n") ~ fitted(.)|Type.f,type = c("p", "smooth"), lwd
 ```
 
 the variance is not constant
+
+
+**a) Do both types migrate similarly over time?**
++ The values taken at baseline are not significant since the MTMP was measured 1 day after the operation,therefore there is no change.
++ No, the protheses type do not migrate similarly over time. The mean change MTMP increases from month 3 to 60 months (5 years) after the operation for the prothesis type 1. While the mean MTMP for type 2 increases from baseline to 3 months, but it decreases from year 1 to year 5. 
+*is there a lot of data lost from the patients for type 2 for the last measurement? 
+
+**b) Report the differences in the mean migration between the two operation types at each time point**
+**Intervals for 95% confidence level**
+
+```{r}
+intervals(model17)
+```
+
+**c) Report the size of the migration change from 3 months to 1 year, 3 months to 2 years, 3 months to 5 years and change from 1 year to 5 year pero operation type and make statistical inference. Given the corresponding 95% confidence interval and p-value.**
+
+
+**d) Are these changes different between the two types? Give the corresponding 95% confidence interval and p-value**
+
 
 # Q.3 Linear Mixed-effects model
 
