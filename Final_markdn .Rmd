@@ -1,0 +1,488 @@
+---
+title: 'Case Study: Prostheses'
+author: 'Yuxuan LI (s2485265), Ariel Liang (s2614693), Yuying Tan (s2586401), María Zilli (s2261030)'
+date: "March 18, 2020"
+output:
+  html_document
+geometry: margin=0.8in
+fontsize: 12pt
+---
+# Introduction
+The following 
+Maximum Total Point Motion (MTPM)
+For data preparation see Anex 1. 
+
+The following libraries were used 
+```{r}
+load("prostheses.rdata") 
+require(pacman)
+p_load(lattice, lme4, nlme, ggplot2)
+
+```
+
+Transformation of the variable type of protheses to factor levels 1 and 2 
+Transformation of the variable Months into factor, the following analysis uses the variable Months instead of Years as its interpretation is easier. The baseline is considered to be month 0 equal to the first MTPM one day after the operation. 
+```{r}
+DATA$Month.f <- factor(DATA$FU.Months, levels = c(0,3,12,24,60))
+DATA$Type.f <- factor(DATA$Type, levels = c(1,2))
+```
+
+# Q. 1 
+
+## Plots for Mean Structure and Data exploration 
+
+The following section intends to describe the data, and use graphical techniques to explore the mean structure, the variance structure and the correlation structure. 
+
+**Mean per protheses type and month** 
+```{r}
+with(DATA, tapply(nMTPM, list(Month.f, Type), mean, na.rm = TRUE))
+```
+The means for the Maximum Total Point Motion (MTPM) both increase with both types of prothesis, but the change in mean is larger for type 2. 
+
+**Variance per protheses type and month** 
+```{r}
+with(DATA, tapply(nMTPM, list(Month.f, Type), var, na.rm = TRUE))
+```
+Variance increases for both types with time, however there are larger variance values for type 2. 
+
+**Plot for individual profiles** 
+
+```{r}
+xyplot(nMTPM ~ Month.f , groups =ID, data = DATA, xlab = "Month", ylab = "MTPM(mm) ", type = "l")
+```
+
+Plot of individual profiles shows an increase in MTPM for almost all individuals from baseline (first day after the cirgury) to 3 months after the operation, after the 3 months we see a fairly continuos trend. 
+However, some outliers appear in the graph, particularly individuals which show a great increase in mobility throughout the months and others which show a decerase in mobility. 
+
+**Plot showing individual profiles per type of prothesis** 
+```{r}
+xyplot(nMTPM ~ Month.f | Type.f, groups =ID, data = DATA, xlab = "Month", ylab = "MTPM (mm)", type = "l")
+```
+
+For the type 2 we see a steep increase in MTPM 3 months after the cirgury. After the three months more steady however differences in individual profiles.For type 1 there is a slower increase in the profiles and more diverse MTPM. 
+
+**Plot for mean MTPM for each type and period, for both types the MTPM increase**
+```{r}
+xyplot(nMTPM ~ Month.f | Type.f, groups =ID, data = DATA, xlab = "Month", ylab = "MTPM (mm)", type = "l", panel = function(x, y) {
+  panel.average(x, y, horizontal = FALSE, col = "blue")
+})
+```
+
+The mean shows a steap increase for type 2 protheses for the first 3 months postoperation and after a flatter increase, while for type 1 the increase in MTPM is more constant. Further, type 1 shows a lower MTPM mean level than type 2. 
+
+
+**Age vs. MTPM**
+```{r}
+p <- ggplot(data = DATA, aes(x = Age, y = nMTPM)) + geom_point( col = "darkblue", alpha = .15)
+p+geom_smooth(method = lm )
+```
+
+The graph shows slightly higher values of MTPM for age below 50, however there are only five observations from patients below 50 years old. The patients are more clustered between 60 and 80 years (this is expected from the nature of the study). From 50 to 80 years there is no clear relationship between age and MTPM levels. 
+
+
+**Body Mas Index vs MTPM** 
+
+```{r,echo=FALSE}
+p1 <- ggplot(data = DATA, aes(x = BMI, y = nMTPM)) + geom_point( col = "darkblue", alpha = .15)
+p1 + geom_smooth(method = lm )
+```
+
+
+There is no clear relationship between BMI and MTPM, even though the graph shows a slight increase, there is a cluster of patients between the levels of 25 to 30 BMI. 
+
+**Sex vs.MTPM** 
+```{r}
+plot(nMTPM ~ Sex , data = DATA, type = "l", groups = ID, col = c("darkblue", "darkred"))
+```
+
+
+MTPM values seem to have more variation for females than to males. The median is lower for males than females, as well as the upper values (larger values for MTPM correspond to females). 
+
+
+
+**Plot per protheses type**
+
+
+```{r,echo=FALSE}
+p2 <- ggplot(DATA, aes( x = Month.f, y=nMTPM , group= ID )) 
+p2 + geom_point(aes(colour= Type.f)) 
+```
+
+
+More values are clustered for type 1 at lower values of MTPM and higher values for type 2. 
+
+
+**Plot per Sex and Type**
+
+
+```{r,echo=FALSE}
+p2 + geom_point(aes(colour= Type.f)) + facet_grid(.~Sex) 
+```
+
+
+For males type 1 values look clustered around lower values of MTPM, for females there is more variation. Further, females show higher values of MTPM than males.  
+
+
+**Interaction between Sex and Age**
+
+
+```{r}
+p3 <- ggplot(data = DATA, aes(x = Age, y = nMTPM,fill = Sex)) + geom_point( col = "darkblue", alpha = .15)
+p3+geom_smooth(method = lm )
+``` 
+
+**Interaction between BMI and Age**
+
+```{r}
+p4 <- ggplot(data = DATA, aes(x = BMI, y = nMTPM,fill = Sex)) + geom_point( col = "darkblue", alpha = .15)
+p4+geom_smooth(method = lm )
+``` 
+
+**Interaction between Sex and nMTPM**
+```{r}
+p5 <- ggplot(data = DATA, aes(x = FU.Months, y = nMTPM,fill = Sex)) + geom_point( col = "darkblue", alpha = .15)
+p5+geom_smooth(method = lm )
+```
+
+##Conclusions
+From the spaghetti plots we can assume that there is a linear relationship between time and MTPM output variable. The exploratory analysis shows there are differences between the two types of protheses, and different migrations for men and women. 
+
+# Q.2 Multivariate model 
+
+**1.First we consider an elaborate model for the mean response** 
+
+From the EDA, we consider the structure below for now. We will choose between an Unstructured model and (Semi-) Parametric model. 
+
+```{r, eval=FALSE}
+model1 <- gls(nMTPM ~ Age*Sex+Month.f*Type.f+Sex*BMI+Sex*Month.f,
+              data = DATA,
+              method = "REML")
+
+
+model2 <- gls(nMTPM ~  Age+Sex+FU.Months*Type+BMI,
+              correlation = corSymm(form = ~ 1 | ID),
+              weights = varIdent(form = ~ 1 | FU.Months),
+              data = DATA,
+              method = "REML")
+
+
+summary(model1)
+summary(model2)
+model1 <- update(model1, method = "ML")
+model2 <- update(model2, method = "ML")
+anova(model1,model2)
+```
+
+Model1 is better than model2, we prefer Unstructured model over (Semi-) Parametric model 
+*But then why we used after model 2 for the next section?, isn't it the other way since a unstructured is better for few follow ups? *
+
+**2.Select a correlation structure (same mean model but different covariance structures)**  
+
+The following models consider compound symmetry, continuos ARI, linear Gaussian and constant variance in time strucutres. 
+
+```{r, eval=FALSE}
+model3 <- gls(nMTPM ~ Age*Sex+Month.f*Type.f+Sex*BMI+Sex*Month.f,
+              data = DATA,
+              correlation = corSymm(form = ~ 1 | ID),
+              weights = varIdent(form = ~ 1 | FU.Months),
+              na.action = na.exclude, method = "REML")
+summary(model3)
+
+
+cov.mat <- getVarCov(model3, individual = 3)
+cov.mat
+cov2cor(cov.mat) #We observe the  correlations decrease with time, so we try other correlation structures.
+
+model4 <- gls(nMTPM ~ Age*Sex+Month.f*Type.f+Sex*BMI+Sex*Month.f,
+              data = DATA,
+              correlation = corCompSymm(form = ~ FU.Months | ID),
+              na.action = na.exclude, method = "REML")
+
+model5 <- gls(nMTPM ~ Age*Sex+Month.f*Type.f+Sex*BMI+Sex*Month.f,
+              data = DATA,
+              correlation = corAR1(form = ~ FU.Months| ID),
+              na.action = na.exclude, method = "REML")
+
+model6 <- gls(nMTPM ~ Age*Sex+Month.f*Type.f+Sex*BMI+Sex*Month.f,
+              data = DATA,
+              correlation = corLin(form = ~ FU.Months | ID),
+              na.action = na.exclude, method = "REML")
+
+model7 <- gls(nMTPM ~ Age*Sex+Month.f*Type.f+Sex*BMI+Sex*Month.f,
+              data = DATA,
+              correlation = corGaus(form = ~ FU.Months | ID),
+              na.action = na.exclude, method = "REML")
+
+model8 <- gls(nMTPM ~ Age*Sex+Month.f*Type.f+Sex*BMI+Sex*Month.f,
+              data = DATA,
+              correlation = corExp(form = ~ FU.Months | ID),
+              na.action = na.exclude, method = "REML")
+
+#Compare models 
+anova(model4,model5, model6, model7, model8) 
+#Model4 gives lowest c AIC and BIC (model with Compound Symmetry Structure)
+```
+
+**Extension of the correlation structures by assumption of heteroscedastic errors** 
+
+```{r, eval= FALSE}
+model9 <- gls(nMTPM ~ Age*Sex+Month.f*Type.f+Sex*BMI+Sex*Month.f,
+              data = DATA,
+              correlation = corCompSymm(form = ~ FU.Months | ID),
+              weights =  varExp(form = ~ FU.Months),
+              na.action = na.exclude, method = "REML")
+
+
+model10 <- gls(nMTPM ~ Age*Sex+Month.f*Type.f+Sex*BMI+Sex*Month.f,
+              data = DATA,
+              correlation = corAR1(form = ~ FU.Months | ID),
+              weights =  varExp(form = ~ FU.Months),
+              na.action = na.exclude, method = "REML")
+
+
+model11 <- gls(nMTPM ~ Age*Sex+Month.f*Type.f+Sex*BMI+Sex*Month.f,
+              data = DATA,
+              correlation = corLin(form = ~ FU.Months | ID),
+              weights =  varExp(form = ~ FU.Months),
+              na.action = na.exclude, method = "REML")
+
+
+model12 <- gls(nMTPM ~ Age*Sex+Month.f*Type.f+Sex*BMI+Sex*Month.f,
+               data = DATA,
+               correlation = corGaus(form = ~ FU.Months | ID),
+               weights =  varExp(form = ~ FU.Months),
+               na.action = na.exclude, method = "REML")
+
+
+model13 <- gls(nMTPM ~ Age*Sex+Month.f*Type.f+Sex*BMI+Sex*Month.f,
+               data = DATA,
+               correlation = corExp(form = ~ FU.Months | ID),
+               weights =  varExp(form = ~ FU.Months),
+               na.action = na.exclude, method = "REML")
+
+#Compare Models with heteroscedastic errors
+
+anova(model9, model10, model11, model12, model13)
+
+## BIC and AIC lowest for model 9 (Compound Symmetry Structure)
+
+## We can compare model 4 and model 9 
+anova(model9, model4)
+## model 9 gives the lowest AIC & BIC so we proceed with model 9
+```
+
+**3.Now let us simplify the mean model by excluding non-significant terms** 
+
+```{r, eval=FALSE}
+summary(model9)
+
+#exclude term Age
+model14 <- update(model9, .~.-Age)
+summary(model14)
+anova(model14)
+
+#exclude interaction between Sex and Age as the p-value shows the interaction is not significant (.844)
+
+model15 <- gls(nMTPM ~ Month.f*Type.f+Sex*BMI+Sex*Month.f,
+               data = DATA,
+               correlation = corCompSymm(form = ~ FU.Months | ID),
+               weights =  varExp(form = ~ FU.Months),
+               na.action = na.exclude, method = "REML")
+
+summary(model15)
+anova(model15)
+
+#remove interaction between Sex and BMI
+model16 <- gls(nMTPM ~ Month.f*Type.f+Sex*Month.f,
+               data = DATA,
+               correlation = corCompSymm(form = ~ FU.Months | ID),
+               weights =  varExp(form = ~ FU.Months),
+               na.action = na.exclude, method = "REML")
+
+summary(model16)
+anova(model16)
+```
+
+```{r}
+#remove Sex as results show it is not significant 
+model17 <- gls(nMTPM ~ Month.f*Type.f+Sex*Month.f-Sex,
+               data = DATA,
+               correlation = corCompSymm(form = ~ FU.Months | ID),
+               weights =  varExp(form = ~ FU.Months),
+               na.action = na.exclude, method = "REML")
+
+
+summary(model17)
+anova(model17)
+```
+
+**Regression coefficient interpretation (from model 17)**
+
++ (Intercept): mean migration measured by the MTMP at baseline (first day after surgery) for type 1 protheses group 
++ Month.f3: change in mean MTMP for 3 months postoperation for type 1 protheses group   
++ Month.f12: change in mean MTMP for 1 year postoperation for type 1 protheses group 
++ Month.f24: change in mean MTMP for 2 years postoperation for type 1 protheses group 
++ Month.f60: change in mean MTMP for 5 years postoperation for type 1 protheses group 
++ Type.f2: difference in mean MTMP between type 1 group and type 2 group at baseline
++ Month.f3:Type.f2: difference in rate of change in mean MTMP between type 1 and type 2, 3 months postoperation 
++ Month.f12:Type.f2: difference in rate of change in mean MTMP between type 1 and type 2, 1 year postoperation 
++ Month.f24:Type.f2: difference in rate of change in mean MTMP between type 1 and type 2, 2 years postoperation 
++ Month.f60:Type.f2: difference in rate of change in mean MTMP between type 1 and type 2, 5 years postoperation 
+
+*Please check this interpretations 
+*¿? unsure about the interpretation of the following, is it difference in rate chanfe in mean MTMP for males for type 1? Month.f0:SexMale    ; Month.f3:SexMale ; Month.f12:SexMale ; Month.f24:SexMale; Month.f60:SexMale
+
+**a) Do both types migrate similarly over time?**
++ The values taken at baseline are not significant since the MTMP was measured 1 day after the operation,therefore there is no change.
++ No, the protheses type do not migrate similarly over time. The mean change MTMP increases from month 3 to 60 months (5 years) after the operation for the prothesis type 1. While the mean MTMP for type 2 increases from baseline to 3 months, but it decreases from year 1 to year 5. 
+*is there a lot of data lost from the patients for type 2 for the last measurement? 
+
+**b) Report the differences in the mean migration between the two operation types at each time point**
+**Intervals for 95% confidence level**
+
+```{r}
+intervals(model17)
+```
+
+**c) Report the size of the migration change from 3 months to 1 year, 3 months to 2 years, 3 months to 5 years and change from 1 year to 5 year pero operation type and make statistical inference. Given the corresponding 95% confidence interval and p-value.**
+
+
+**d) Are these changes different between the two types? Give the corresponding 95% confidence interval and p-value**
+
+##Residual plots
+
+**Standarized residuals**
+```{r}
+plot(model17, resid(., type = "p") ~ fitted(.),type = c("p", "smooth"), lwd = 3)
+```
+
+**Standarized residuals per type** 
+```{r}
+plot(model17, resid(., type="p") ~ fitted(.)|Type.f,type = c("p", "smooth"), lwd = 3)
+```
+
+**Normalized residuals** 
+```{r}
+plot(model17, resid(., type="n") ~ fitted(.),type = c("p", "smooth"), lwd = 3)
+```
+
+**Normalized residuals**
+```{r}
+plot(model17, resid(., type="n") ~ fitted(.)|Type.f,type = c("p", "smooth"), lwd = 3)
+```
+
+the variance is not constant
+
+# Q.3 Linear Mixed-effects model
+
+* Consider individuals as random 
+
+```{r}
+# Model with only protheses types
+model.1 <- lme(nMTPM ~ Type.f, random = ~1|ID,
+               data = DATA)
+
+#Model with only types and time 
+model.2 <- lme(nMTPM ~ Month.f*Type.f, random = ~1|ID,
+               data = DATA)
+
+# Model with types and time, sex, age, bmi Month.f*Type.f+Sex*BMI+Sex*Month.f
+model.3 <- lme(nMTPM ~ Age*Sex+Month.f*Type.f+Sex*BMI+Sex*Month.f, 
+               random = ~1|ID,
+               data = DATA)
+
+# Exclude Age 
+model.4 <- update(model.3, .~.-Age)
+summary(model.4)
+
+model.5 <- lme(nMTPM ~ Month.f*Type.f+Sex*BMI+Sex*Month.f, 
+               random = ~1|ID,
+               data = DATA)
+summary(model.5)
+anova(model.5)
+
+#remove interaction between Sex and BMI
+model.6 <- lme(nMTPM ~ Month.f*Type.f+BMI+Sex*Month.f, 
+               random = ~1|ID,
+               data = DATA)
+summary(model.6)
+anova(model.6)
+
+##Check for the use of  "FU.Months""Type" or "Month.f""Type.f"
+
+model.7 <- lme(nMTPM ~ FU.Months*Type+BMI+Sex*FU.Months, 
+               random = ~1|ID,
+               data = DATA)
+summary(model.7)
+anova(model.7)
+
+###from the residual plot and qqplot, I think it does not work better than "Month.f""Type.f".
+
+#remove interaction between FU.Months and Type
+model.8 <- lme(nMTPM ~ FU.Months+Type+BMI+Sex*FU.Months, 
+               random = ~1|ID,
+               data = DATA)
+
+model.9 <- lme(nMTPM ~ FU.Months+Type+BMI+Sex*FU.Months, 
+                random = ~1|ID,
+                weights = varIdent(form = ~ 1 | FU.Months),
+                data = DATA)
+
+model..6 <- update(model.6, method = "ML")
+model..9 <- update(model.9, method = "ML")
+anova(model..6,model..9) #model.6 is better
+```
+
+**Between and within subject variation**
+```{r}
+getVarCov(model..6)
+
+#Between subject variation 
+bs <- getVarCov(model..6, type = "random.effects")  [1] #please check because i am not sure about this 
+
+#Within subject variation 
+ws <- getVarCov(model..6, type ="conditional")[[1]][1,1] #please check because i am not sure about this  
+
+# Marginal cov matrix 
+getVarCov(model..6, type = "marginal", ind = 2)
+
+#Intraclass correlation coefficient of reliability
+reliab.coeficcient <- bs/(bs + ws)
+reliab.coeficcient
+```
+
+
+##Residual plots 
+```{r}
+plot(model.6, resid(., type = "p") ~ fitted(.),type = c("p", "smooth"), lwd = 3)
+plot(model.8, resid(., type = "p") ~ fitted(.),type = c("p", "smooth"), lwd = 3)
+
+``` 
+
+```{r}
+plot(model.9, resid(., type="n") ~ fitted(.),type = c("p", "smooth"), lwd = 3)
+plot(model.9, resid(., type="n") ~ fitted(.)|Type.f,type = c("p", "smooth"), lwd = 3)
+``` 
+
+**Check for normality**
+```{r}
+qqnorm(model.9, ~ resid(., type = "p"), abline = c(0, 1))
+qqnorm(model.6, ~ resid(., type = "p"), abline = c(0, 1))
+``` 
+
+
+**a) Do both types migrate similarly over time?**
+
+
+
+**c) Report the size of the migration change from 3 months to 1 year, 3 months to 2 years, 3 months to 5 years and change from 1 year to 5 year pero operation type and make statistical inference. Given the corresponding 95% confidence interval and p-value.**
+
+
+
+**b) Report the differences in the mean migration between the two operation types at each time point**
+**Intervals for 95% confidence level** 
+
+
+
+**d) Are these changes different between the two types? Give the corresponding 95% confidence interval and p-value**
+
