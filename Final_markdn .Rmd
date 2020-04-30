@@ -246,9 +246,7 @@ model1 <- gls(nMTPM ~ Age*Sex+Month.f*Type.f+Sex*BMI+Sex*Month.f,
               method = "REML")
 
 
-model2 <- gls(nMTPM ~  Age+Sex+FU.Months*Type+BMI,
-              correlation = corSymm(form = ~ 1 | ID),
-              weights = varIdent(form = ~ 1 | FU.Months),
+model2 <- gls(nMTPM ~ Age*Sex+FU.Month*Type+Sex*BMI+Sex*FU.Month,
               data = DATA,
               method = "REML")
 
@@ -425,7 +423,7 @@ plot(model17, resid(., type="n") ~ fitted(.),type = c("p", "smooth"), lwd = 3)
 plot(model17, resid(., type="n") ~ fitted(.)|Type.f,type = c("p", "smooth"), lwd = 3)
 ```
 
-the variance is not constant
+#the variance is not constant
 
 
 **a) Do both types migrate similarly over time?**
@@ -541,6 +539,7 @@ plot(model.9, resid(., type="n") ~ fitted(.)|Type.f,type = c("p", "smooth"), lwd
 ```{r}
 qqnorm(model.9, ~ resid(., type = "p"), abline = c(0, 1))
 qqnorm(model.6, ~ resid(., type = "p"), abline = c(0, 1))
+# model.6 has better normality based on qqnorm 
 ``` 
 
 
