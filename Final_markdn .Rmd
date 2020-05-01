@@ -49,7 +49,7 @@ post_val <- function(vector, location)
 
 #load data
 #file. <- "..." # specify the directory with data
-DATA <- read.spss(file.path(file., "Prostheses-2020.txt"), to.data.frame = TRUE)
+DATA <- read.table(file = "Prostheses-2020.txt")
 
 #delete NA values
 n_patient <- max(DATA$ID)
@@ -103,10 +103,11 @@ rm(data, id, k_row, row_na, row_na_list, a, b)
 ```
 
 **The workspace made be loaded from prostheses.RData in case the codes failed**   
+```{r}
 load("prostheses.RData") 
-
+```
 **The following libraries were used**
-
+```{r}
 require(pacman)
 library(lattice)
 library(lme4)
@@ -114,7 +115,7 @@ library(nlme)
 library(ggplot2)
 library(aod)
 library(dplyr)
-
+```
 **The following variables were transformed for the anlysis:** 
 
 + Transformation of the variable type of protheses to factor levels 1 and 2 
@@ -257,7 +258,7 @@ model1 <- gls(nMTPM ~ Age*Sex+Month.f*Type.f+Sex*BMI+Sex*Month.f,
               method = "REML")
 
 
-model2 <- gls(nMTPM ~ Age*Sex+FU.Month*Type+Sex*BMI+Sex*FU.Month,
+model2 <- gls(nMTPM ~ Age*Sex+FU.Months*Type+Sex*BMI+Sex*FU.Months,
               data = DATA,
               method = "REML")
 
