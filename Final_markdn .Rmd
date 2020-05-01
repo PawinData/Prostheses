@@ -438,6 +438,10 @@ plot(model17, resid(., type="n") ~ fitted(.)|Type.f,type = c("p", "smooth"), lwd
 + The values taken at baseline are not significant since the MTMP was measured 1 day after the operation,therefore there is no change of MTMP. 
 + The protheses types do not migrate similarly over time. Even though the general trend is an increase in MTPM for the first three months and after a stabilization, there are differences. For type 1, the mean for MTMP shows an increase from baseline until 5 years, and for type 2 there is an increase from baseline to the 3 months measurement and after a stabilization. The increase from baseline to 3 months is more significant for type 2. 
 
+```{r}
+t.test(nMTPM~Type.f,data = DATA, paired = TRUE) 
+```
+
 **b) Report the differences in the mean migration between the two operation types at each time point**
 **Intervals for 95% confidence level**
 
@@ -448,19 +452,7 @@ For type 1 the larger differences are between baseline and 3 months and from 3 m
 
 For type 2 the larger difference in mean MTMP is between baseline and the first 3 months, after there is a slight decrease in MTMP. 
 
-**c) Report the size of the migration change from 3 months to 1 year, 3 months to 2 years, 3 months to 5 years and change from 1 year to 5 year pero operation type and make statistical inference. Given the corresponding 95% confidence interval and p-value.**
-
-For this we estimate the difference for each period separately with a t.test for each period 
-
-```{r}
-t.test(nMTPM ~ Type.f, data = DATA, subset = which (DATA$FU.Months== 0), paired =FALSE)
-t.test(nMTPM ~ Type.f, data = DATA, subset = which (DATA$FU.Months== 3), paired =FALSE)
-t.test(nMTPM ~ Type.f, data = DATA, subset = which (DATA$FU.Months== 12), paired =FALSE)
-t.test(nMTPM ~ Type.f, data = DATA, subset = which (DATA$FU.Months== 24), paired =FALSE)
-t.test(nMTPM ~ Type.f, data = DATA, subset = which (DATA$FU.Months== 60), paired =FALSE)
-```
-
-The p-values for each t test are significant except for the baseline which is one day after the operation. The type of protheses is statistically significant at all other periods separately. 
+**c) Report the size of the migration change from 3 months to 1 year, 3 months to 2 years, 3 months to 5 years and change from 1 year to 5 year per operation type and make statistical inference. Given the corresponding 95% confidence interval and p-value.**
 
 ```{r}
 #Type 1
@@ -476,15 +468,67 @@ D2 <- data2[data2$Month.f == 3, "nMTPM"] - data2[data2$Month.f == 60, "nMTPM"]
  t.test(x =D2, y= NULL)
  
 ```
-For type 1 the difference between 
+The difference from month 3 to 5 years after the operation is significant for type 1 only, this demonstrates different migration in time for each type. 
+
+
+A:the astimated rate change in type1 group is 0.00798, and 95% intervar is(0.005115998 0.010844256)
+
+```{r}
+model1 <- gls(nMTPM ~ FU.Months*Type.f,
+               data = DATA,
+               correlation = corCompSymm(form = ~ FU.Months | ID),
+               weights =  varExp(form = ~ FU.Months),
+               na.action = na.exclude, method = "REML")
+summary(model1)
+
+#type 1 change rate
+type_1est <- summary(model1)$tTable["FU.Months","Value"]
+type_1upp <- type_1est +
+        1.96*summary(model1)$tTable["FU.Months","Std.Error"] 
+type_1low <- type_1est -
+        1.96*summary(model1)$tTable["FU.Months","Std.Error"] 
+type_1inter <-c(type_1low, type_1upp)
+type_1inter
+library(aod)
+w.test1 <- wald.test(b = coef(model1),
+                     Sigma = vcov(model1),
+                     L = rbind(c(0,1,0,0)))
+w.test1
+#type 2 change rate 
+betas <-coef(model1)
+V <-vcov(model1)
+L <-c(0,1,0,1)
+type_2est <- c(L %*% betas)
+ses <- sqrt(L %*% V %*% L)
+type_2upp <-est + 1.96*ses
+type_2low <-est - 1.96*ses
+type_2inter <- c(type_2low,type_2upp)
+type_2inter
+w.test2 <- wald.test(b = coef(model1),
+                     Sigma = vcov(model1),
+                     L = rbind(c(0,1,0,1)))
+w.test2
+#type 1 migration change
+type_1m31 <- type_1est*(12-3)
+type_1m32 <- type_1est*(24-3)
+type_1m35 <- type_1est*(60-3)
+type_1m15 <- type_1est*(60-12)
+#type 2 migration change
+type_2m31 <- type_2est*(12-3)
+type_2m32 <- type_2est*(24-3)
+type_2m35 <- type_2est*(60-3)
+type_2m15 <- type_2est*(60-12)
+```
 
 **d) Are these changes different between the two types? Give the corresponding 95% confidence interval and p-value**
 
 Since we know there is a more significant increase in the first three months and after a more steady increase or constant migrantion, let us compare the differences in these periods for each type. 
 
-
-
-
+```{r}
+Diff_type1 <-c(type_1m31,type_1m32,type_1m35,type_1m15)
+Diff_type2 <-c(type_2m31,type_2m32,type_2m35,type_2m15)
+t.test(Diff_type1 -Diff_type2)
+```
 
 # Q.3 Linear Mixed-effects model
 
