@@ -569,7 +569,9 @@ The result from the performed t-test for the differences between type 1 and type
 
 
 **data transformation**
-# there are few difference in the residuals plot and qqplot of model17, so we do not consider data transformation 
+
+There are few difference in the residuals plot and qqplot of model17, so we do not consider data transformation 
+
 ```{r}
 DATA$log_nM <- log(DATA$nMTPM + 1, base = 10)
 DATA$log_month <- log(DATA$FU.Months+1, base = 10)
@@ -627,7 +629,7 @@ model.6 <- lme(nMTPM ~ FU.Months*Type+BMI+Sex*FU.Months,
 summary(model.6)
 anova(model.6)
 
-###from the residual plot and qqplot, I think it does not work better than "Month.f""Type.f".
+###from the residual plot and qqplot, it does not work better than "Month.f""Type.f".
 
 #remove interaction between FU.Months and Type
 model.7 <- lme(nMTPM ~ FU.Months+Type+BMI+Sex*FU.Months, 
@@ -640,6 +642,7 @@ model.8 <- lme(nMTPM ~ FU.Months+Type+BMI+Sex*FU.Months,
                 data = DATA)
                 
 #uncorrelated random intercepts and random slopes model
+
 model.9 <- lme(nMTPM ~ FU.Months+Type+BMI+Sex*FU.Months, 
                 random = list(ID = pdDiag(form = ~ FU.Months)),
                 weights = varIdent(form = ~ 1 | FU.Months),
@@ -673,8 +676,11 @@ reliab.coeficcient <- bs/(bs + ws)
 reliab.coeficcient
 ```
 
-Although in the previous step we chose model.5, it is not the final conclusion.Next we compare model.5, model.8 and model.9 by analyzing the residual plot and qqplot.
-**residual plot**
+Although in the previous step we chose model.5, it is not the final conclusion.
+Next we compare model.5, model.8 and model.9 by analyzing the residual plot and qqplot.
+
+## Residual plots 
+
 ```{r}
 plot(model.5, resid(., type="n") ~ fitted(.),type = c("p", "smooth"), lwd = 3)
 plot(model.5, resid(., type="n") ~ fitted(.)|Type.f,type = c("p", "smooth"), lwd = 3)
@@ -682,12 +688,11 @@ plot(model.8, resid(., type="n") ~ fitted(.),type = c("p", "smooth"), lwd = 3)
 plot(model.8, resid(., type="n") ~ fitted(.)|Type.f,type = c("p", "smooth"), lwd = 3)
 plot(model.9, resid(., type="n") ~ fitted(.),type = c("p", "smooth"), lwd = 3)
 plot(model.9, resid(., type="n") ~ fitted(.)|Type.f,type = c("p", "smooth"), lwd = 3)
+
 ```
 The residual plot of model.5 violates the assumption of zero mean for errors. From the residual plot of model.8 and model.9, we can see there is a trend over time, so  model.8 and model.9 also do not persorm well for the zero mean assumption.
 
-
  
-
 **Check for normality**
 ```{r}
 qqnorm(model.5, ~ resid(., type = "p"), abline = c(0, 1))
@@ -696,6 +701,7 @@ qqnorm(model.9, ~ resid(., type = "p"), abline = c(0, 1))
 
 # model.5 has better normality based on qqnorm
 ```
+
 After weighing the above plots and the method we use in Q3, we finally still choose model.5 as the linear mixed-effects model.
 
 
@@ -791,7 +797,9 @@ t.test(Diff_type1 -Diff_type2)
 **What is the most parsimonious random-effects and mean structure that fits best on the data? Compare the results with those from the multivariate model. Run model diagnostics to check the validity of the model assumptions.**
 
 In the previous steps, we chose model17 as the multivariate model and model.5 as the linear mixed-effectes model. Now let us compare these two models.
+
 **check for normality**
+
 ```{r}
 qqnorm(model.5, ~ resid(., type = "p"), abline = c(0, 1))
 
@@ -808,6 +816,7 @@ plot(model17, resid(., type = "p") ~ fitted(.),type = c("p", "smooth"), lwd = 3)
 For the assumption of zero mean, model17 is better.
 
 Considering both the two assumptions above, we finally conclude that model17, which is the multivariate model, is prefered.
+
 ```{r}
 summary(model17)
 ```
