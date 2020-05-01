@@ -480,51 +480,75 @@ For type 1 the larger differences are between baseline and 3 months and from 3 m
 
 For type 2 the larger difference in mean MTMP is between baseline and the first 3 months, after there is a slight decrease in MTMP. 
 
-**c) Report the size of the migration change from 3 months to 1 year, 3 months to 2 years, 3 months to 5 years and change from 1 year to 5 year per operation type and make statistical inference. Given the corresponding 95% confidence interval and p-value.**
-
-
-A:the astimated rate change in type1 group is 0.00798, and 95% intervar is(0.005115998 0.010844256)
-
 ```{r}
-model1 <- gls(nMTPM ~ FU.Months*Type.f,
+modelq2 <- gls(nMTPM ~ FU.Months*Type.f,
                data = DATA,
                correlation = corCompSymm(form = ~ FU.Months | ID),
                weights =  varExp(form = ~ FU.Months),
                na.action = na.exclude, method = "REML")
-summary(model1)
+summary(modelq2)
+
+# beta0 + beta1 * FU.Months under group type1
+# beta0 + beta1 * FU.Months + beta2 + beta3 * FU.Months under group type2
+# For those who took type1, the month effect is beta1 * FU.Months
+# For those who took type2, the month effect is beta1 * FU.Months + beta3 * FU.Months
+# Thus beta3 * FU.Months is the difference in the type at each month
+
+beta3 <- summary(modelq2)$tTable["FU.Months:Type.f2","Value"]
+p_value <- summary(modelq2)$tTable["FU.Months:Type.f2","p-value"]
+#95% confidence interval
+beta3_upp <- beta3 + 1.96 * summary(modelq2)$tTable["FU.Months:Type.f2","Std.Error"] 
+beta3_low <- beta3 - 1.96 * summary(modelq2)$tTable["FU.Months:Type.f2","Std.Error"]
+beta3inter <- c(beta3_low,beta3_upp)
+```
+
+**c) Report the size of the migration change from 3 months to 1 year, 3 months to 2 years, 3 months to 5 years and change from 1 year to 5 year per operation type and make statistical inference. Given the corresponding 95% confidence interval and p-value.**
+
+modelq2 <- gls(nMTPM ~ FU.Months*Type.f,
+               data = DATA,
+               correlation = corCompSymm(form = ~ FU.Months | ID),
+               weights =  varExp(form = ~ FU.Months),
+               na.action = na.exclude, method = "REML")
+summary(modelq2)
 
 #type 1 change rate
-type_1est <- summary(model1)$tTable["FU.Months","Value"]
+type_1est <- summary(modelq2)$tTable["FU.Months","Value"]
 type_1upp <- type_1est +
-        1.96*summary(model1)$tTable["FU.Months","Std.Error"] 
+        1.96*summary(modelq2)$tTable["FU.Months","Std.Error"] 
 type_1low <- type_1est -
-        1.96*summary(model1)$tTable["FU.Months","Std.Error"] 
+        1.96*summary(modelq2)$tTable["FU.Months","Std.Error"] 
 type_1inter <-c(type_1low, type_1upp)
 type_1inter
+
 library(aod)
-w.test1 <- wald.test(b = coef(model1),
-                     Sigma = vcov(model1),
+w.test1 <- wald.test(b = coef(modelq2),
+                     Sigma = vcov(modelq2),
                      L = rbind(c(0,1,0,0)))
 w.test1
+
 #type 2 change rate 
-betas <-coef(model1)
-V <-vcov(model1)
+betas <-coef(modelq2)
+V <-vcov(modelq2)
 L <-c(0,1,0,1)
 type_2est <- c(L %*% betas)
 ses <- sqrt(L %*% V %*% L)
-type_2upp <- type_2est + 1.96*ses
-type_2low <- type_2est - 1.96*ses
+
+type_2upp <-type_2est + 1.96*ses
+type_2low <-type_2est - 1.96*ses
 type_2inter <- c(type_2low,type_2upp)
 type_2inter
-w.test2 <- wald.test(b = coef(model1),
-                     Sigma = vcov(model1),
+
+w.test2 <- wald.test(b = coef(modelq2),
+                     Sigma = vcov(modelq2),
                      L = rbind(c(0,1,0,1)))
 w.test2
+
 #type 1 migration change
 type_1m31 <- type_1est*(12-3)
 type_1m32 <- type_1est*(24-3)
 type_1m35 <- type_1est*(60-3)
 type_1m15 <- type_1est*(60-12)
+
 #type 2 migration change
 type_2m31 <- type_2est*(12-3)
 type_2m32 <- type_2est*(24-3)
@@ -543,6 +567,24 @@ t.test(Diff_type1 -Diff_type2)
 The result from the performed t-test for the differences between type 1 and type 2 is not significant (p-value = 0.05767). 
 
 
+**data transform**
+
+```{r}
+DATA$log_nM <- log(DATA$nMTPM + 1, base = 10)
+DATA$log_month <- log(DATA$FU.Months+1, base = 10)
+
+library(nlme)
+model17 <- gls(nMTPM ~ Month.f*Type.f+Sex*Month.f-Sex,
+               data = DATA,
+               correlation = corCompSymm(form = ~ FU.Months | ID),
+               weights =  varExp(form = ~ FU.Months),
+               na.action = na.exclude, method = "REML")
+
+plot(model17, resid(., type = "p") ~ fitted(.),type = c("p", "smooth"), lwd = 3)
+plot(model17, resid(., type="p") ~ fitted(.)|Type.f,type = c("p", "smooth"), lwd = 3)
+qqnorm(model17, ~ resid(., type = "p"), abline = c(0, 1))
+
+```
 
 # Q.3 Linear Mixed-effects model
 
@@ -658,18 +700,91 @@ After weighing the above plots and the method we use in Q3, we finally still cho
 
 **a) Do both types migrate similarly over time?**
 
+```{r}
+#the same like Q2(a)
+t.test(nMTPM~Type.f,data = DATA, paired = TRUE)
 
-
-**c) Report the size of the migration change from 3 months to 1 year, 3 months to 2 years, 3 months to 5 years and change from 1 year to 5 year pero operation type and make statistical inference. Given the corresponding 95% confidence interval and p-value.**
-
-
+```
 
 **b) Report the differences in the mean migration between the two operation types at each time point**
 **Intervals for 95% confidence level** 
 
+```{r}
+modelq3 <- lme(nMTPM ~ FU.Months*Type.f, 
+               random = ~1|ID,
+               data = DATA)
+summary(modelq3)
 
+# beta4 + beta5 * FU.Months under group type1
+# beta4 + beta5 * FU.Months + beta6 + beta7 * FU.Months under group type2
+# For those who took type1, the month effect is beta5 * FU.Months
+# For those who took type2, the month effect is beta5 * FU.Months + beta7 * FU.Months
+# Thus beta7 * FU.Months is the difference in the type at each month
+
+beta7 <- summary(modelq3)$tTable["FU.Months:Type.f2","Value"]
+p_value <- summary(modelq3)$tTable["FU.Months:Type.f2","p-value"]
+#95% confidence interval
+beta7_upp <- beta7 + 1.96 * summary(modelq3)$tTable["FU.Months:Type.f2","Std.Error"] 
+beta7_low <- beta7 - 1.96 * summary(modelq3)$tTable["FU.Months:Type.f2","Std.Error"]
+beta7inter <- c(beta7_low,beta7_upp)
+```
+
+**c) Report the size of the migration change from 3 months to 1 year, 3 months to 2 years, 3 months to 5 years and change from 1 year to 5 year pero operation type and make statistical inference. Given the corresponding 95% confidence interval and p-value.**
+
+```{r}
+#type 1 change rate
+type_1est <- summary(modelq3)$tTable["FU.Months","Value"]
+type_1upp <- type_1est +
+        1.96*summary(modelq3)$tTable["FU.Months","Std.Error"] 
+type_1low <- type_1est -
+        1.96*summary(modelq3)$tTable["FU.Months","Std.Error"] 
+type_1inter <-c(type_1low, type_1upp)
+type_1inter
+
+library(aod)
+w.test3 <- wald.test(b = summary(modelq3)$tTable[,"Value"],
+                     Sigma = vcov(modelq3),
+                     L = rbind(c(0,1,0,0)))
+w.test3
+
+#type 2 change rate 
+betas <-summary(modelq3)$tTable[,"Value"]
+V <-vcov(modelq3)
+L <-c(0,1,0,1)
+type_2est <- c(L %*% betas)
+ses <- sqrt(L %*% V %*% L)
+
+type_2upp <-type_2est + 1.96*ses
+type_2low <-type_2est - 1.96*ses
+type_2inter <- c(type_2low,type_2upp)
+type_2inter
+
+w.test4 <- wald.test(b = summary(modelq3)$tTable[,"Value"],
+                     Sigma = vcov(modelq3),
+                     L = rbind(c(0,1,0,1)))
+w.test4
+
+#type 1 migration change
+type_1m31 <- type_1est*(12-3)
+type_1m32 <- type_1est*(24-3)
+type_1m35 <- type_1est*(60-3)
+type_1m15 <- type_1est*(60-12)
+
+#type 2 migration change
+type_2m31 <- type_2est*(12-3)
+type_2m32 <- type_2est*(24-3)
+type_2m35 <- type_2est*(60-3)
+type_2m15 <- type_2est*(60-12)
+```
 
 **d) Are these changes different between the two types? Give the corresponding 95% confidence interval and p-value**
+
+```{r}
+Diff_type1 <-c(type_1m31,type_1m32,type_1m35,type_1m15)
+Diff_type2 <-c(type_2m31,type_2m32,type_2m35,type_2m15)
+
+t.test(Diff_type1 -Diff_type2)
+```
 
 
 **What is the most parsimonious random-effects and mean structure that fits best on the data? Compare the results with those from the multivariate model. Run model diagnostics to check the validity of the model assumptions.**
