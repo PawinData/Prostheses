@@ -437,10 +437,34 @@ plot(model17, resid(., type="n") ~ fitted(.)|Type.f,type = c("p", "smooth"), lwd
 **a) Do both types migrate similarly over time?**
 + The values taken at baseline are not significant since the MTMP was measured 1 day after the operation,therefore there is no change of MTMP. 
 + The protheses types do not migrate similarly over time. Even though the general trend is an increase in MTPM for the first three months and after a stabilization, there are differences. For type 1, the mean for MTMP shows an increase from baseline until 5 years, and for type 2 there is an increase from baseline to the 3 months measurement and after a stabilization. The increase from baseline to 3 months is more significant for type 2. 
++ A paired T -test was performed to show this. 
 
 ```{r}
 t.test(nMTPM~Type.f,data = DATA, paired = TRUE) 
 ```
+
++ Since we know that after operation some migration of the prosthesis is expected and stabilizes afterwards, we check how each type migrates differently from baseline to the first 3 months and after when we see the stabilization period from month 3 to 5 years after the operation. 
+
+``{r}
+#Type 1
+data1 <- filter(DATA, Type.f == "1")
+D1 <- data1[data1$Month.f == 0, "nMTPM"] - data1[data1$Month.f == 3, "nMTPM"]
+D2 <- data1[data1$Month.f == 3, "nMTPM"] - data1[data1$Month.f == 60, "nMTPM"]
+
+
+#Type 2
+data2 <- filter(DATA, Type.f == "2")
+D3 <- data2[data2$Month.f == 0, "nMTPM"] - data2[data2$Month.f == 3, "nMTPM"]
+D4 <- data2[data2$Month.f == 3, "nMTPM"] - data2[data2$Month.f == 60, "nMTPM"]
+
+
+ t.test(x =D1, y= NULL)
+ t.test(x =D3, y= NULL)
+ t.test(x =D2, y= NULL)
+ t.test(x =D4, y= NULL)
+```
+
+The difference is significant for both types of protheses in the first three months after the operation. However, the difference from month 3 to 5 years after the operation is significant for type 1 only, this demonstrates the difference in the stabilization period for each type. 
 
 **b) Report the differences in the mean migration between the two operation types at each time point**
 **Intervals for 95% confidence level**
@@ -448,27 +472,12 @@ t.test(nMTPM~Type.f,data = DATA, paired = TRUE)
 ```{r}
 intervals(model17)
 ```
+
 For type 1 the larger differences are between baseline and 3 months and from 3 months to 1 year after the operation, after this there is a mean increase of MTMP but it is more steady. 
 
 For type 2 the larger difference in mean MTMP is between baseline and the first 3 months, after there is a slight decrease in MTMP. 
 
 **c) Report the size of the migration change from 3 months to 1 year, 3 months to 2 years, 3 months to 5 years and change from 1 year to 5 year per operation type and make statistical inference. Given the corresponding 95% confidence interval and p-value.**
-
-```{r}
-#Type 1
-data1 <- filter(DATA, Type.f == "1")
-D1 <- data1[data1$Month.f == 3, "nMTPM"] - data1[data1$Month.f == 60, "nMTPM"]
-
-#Type 2
-data2 <- filter(DATA, Type.f == "2")
-D2 <- data2[data2$Month.f == 3, "nMTPM"] - data2[data2$Month.f == 60, "nMTPM"]
-
- t.test(x =D1, y= NULL)
- 
- t.test(x =D2, y= NULL)
- 
-```
-The difference from month 3 to 5 years after the operation is significant for type 1 only, this demonstrates different migration in time for each type. 
 
 
 A:the astimated rate change in type1 group is 0.00798, and 95% intervar is(0.005115998 0.010844256)
@@ -522,7 +531,6 @@ type_2m15 <- type_2est*(60-12)
 
 **d) Are these changes different between the two types? Give the corresponding 95% confidence interval and p-value**
 
-Since we know there is a more significant increase in the first three months and after a more steady increase or constant migrantion, let us compare the differences in these periods for each type. 
 
 ```{r}
 Diff_type1 <-c(type_1m31,type_1m32,type_1m35,type_1m15)
