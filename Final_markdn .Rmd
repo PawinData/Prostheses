@@ -610,41 +610,46 @@ anova(model..5,model..9) #model.5 is better
 
 **Between and within subject variation**
 ```{r}
-getVarCov(model..5)
+getVarCov(model.5)
 
 #Between subject variation 
-bs <- getVarCov(model..5, type = "random.effects")  [1] #please check because i am not sure about this 
+bs <- getVarCov(model.5, type = "random.effects")  [1] #please check because i am not sure about this 
 
 #Within subject variation 
-ws <- getVarCov(model..5, type ="conditional")[[1]][1,1] #please check because i am not sure about this  
+ws <- getVarCov(model.5, type ="conditional")[[1]][1,1] #please check because i am not sure about this  
 
 # Marginal cov matrix 
-getVarCov(model..5, type = "marginal", ind = 2)
+getVarCov(model.5, type = "marginal", ind = 2)
 
 #Intraclass correlation coefficient of reliability
 reliab.coeficcient <- bs/(bs + ws)
 reliab.coeficcient
 ```
 
-
-##Residual plots 
+Altough in the previous step we chose model.5, it is not the final conclusion.Next we compare model.5, model.8 and model.9 by analyzing the residual plot and qqplot.
+**residual plot**
 ```{r}
-plot(model.5, resid(., type = "p") ~ fitted(.),type = c("p", "smooth"), lwd = 3)
-plot(model.7, resid(., type = "p") ~ fitted(.),type = c("p", "smooth"), lwd = 3)
-
-``` 
-
-```{r}
+plot(model.5, resid(., type="n") ~ fitted(.),type = c("p", "smooth"), lwd = 3)
+plot(model.5, resid(., type="n") ~ fitted(.)|Type.f,type = c("p", "smooth"), lwd = 3)
 plot(model.8, resid(., type="n") ~ fitted(.),type = c("p", "smooth"), lwd = 3)
 plot(model.8, resid(., type="n") ~ fitted(.)|Type.f,type = c("p", "smooth"), lwd = 3)
-``` 
+plot(model.9, resid(., type="n") ~ fitted(.),type = c("p", "smooth"), lwd = 3)
+plot(model.9, resid(., type="n") ~ fitted(.)|Type.f,type = c("p", "smooth"), lwd = 3)
+```
+The residual plot of model.5 violates the assumption of zero mean for errors. From the residual plot of model.8 and model.9, we can see there is a trend over time, so  model.8 and model.9 also do not persorm well for the zero mean assumption.
+
+
+ 
 
 **Check for normality**
 ```{r}
-qqnorm(model.8, ~ resid(., type = "p"), abline = c(0, 1))
 qqnorm(model.5, ~ resid(., type = "p"), abline = c(0, 1))
-# model.5 has better normality based on qqnorm 
-``` 
+qqnorm(model.8, ~ resid(., type = "p"), abline = c(0, 1))
+qqnorm(model.9, ~ resid(., type = "p"), abline = c(0, 1))
+
+# model.5 has better normality based on qqnorm
+```
+After weighing the above plots and the method we use in Q3, we finally still choose model.5 as the linear mixed-effects model.
 
 
 **a) Do both types migrate similarly over time?**
@@ -662,3 +667,27 @@ qqnorm(model.5, ~ resid(., type = "p"), abline = c(0, 1))
 
 **d) Are these changes different between the two types? Give the corresponding 95% confidence interval and p-value**
 
+
+**What is the most parsimonious random-effects and mean structure that fits best on the data? Compare the results with those from the multivariate model. Run model diagnostics to check the validity of the model assumptions.**
+
+In the previous steps, we chose model17 as the multivariate model and model.5 as the linear mixed-effectes model. Now let us compare these two models.
+**check for normality**
+```{r}
+qqnorm(model.5, ~ resid(., type = "p"), abline = c(0, 1))
+
+qqnorm(model17, ~ resid(., type = "p"), abline = c(0, 1))
+
+```
+For normality,model.6 is better。
+
+```{r}
+plot(model.5, resid(., type = "p") ~ fitted(.),type = c("p", "smooth"), lwd = 3)
+
+plot(model17, resid(., type = "p") ~ fitted(.),type = c("p", "smooth"), lwd = 3)
+```
+For assumption of zero mean, model17 is better
+
+considering both the two assumptions above, we finally conclude that model17, which is the multivariate model, is prefered.
+```{r}
+summary(model17)
+```
