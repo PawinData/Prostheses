@@ -626,7 +626,7 @@ reliab.coeficcient <- bs/(bs + ws)
 reliab.coeficcient
 ```
 
-Altough in the previous step we chose model.5, it is not the final conclusion.Next we compare model.5, model.8 and model.9 by analyzing the residual plot and qqplot.
+Although in the previous step we chose model.5, it is not the final conclusion.Next we compare model.5, model.8 and model.9 by analyzing the residual plot and qqplot.
 **residual plot**
 ```{r}
 plot(model.5, resid(., type="n") ~ fitted(.),type = c("p", "smooth"), lwd = 3)
