@@ -567,8 +567,8 @@ t.test(Diff_type1 -Diff_type2)
 The result from the performed t-test for the differences between type 1 and type 2 is not significant (p-value = 0.05767). 
 
 
-**data transform**
-
+**data transformation**
+# there are few difference in the residuals plot and qqplot of model17, so we do not consider data transformation 
 ```{r}
 DATA$log_nM <- log(DATA$nMTPM + 1, base = 10)
 DATA$log_month <- log(DATA$FU.Months+1, base = 10)
