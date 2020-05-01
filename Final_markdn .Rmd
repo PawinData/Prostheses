@@ -118,8 +118,8 @@ library(dplyr)
 ```
 **The following variables were transformed for the anlysis:** 
 
-+ Transformation of the variable type of protheses to factor levels 1 and 2 
-+ Transformation of the variable Months into factor, the following analysis uses the variable Months instead of Years as its interpretation is easier. The baseline is considered to be month 0 equal to the first MTPM one day after the operation. 
+Transformation of the variable type of protheses to factor levels 1 and 2. 
+Transformation of the variable Months into factor, the following analysis uses the variable Months instead of Years as its interpretation is easier. The baseline is considered to be month 0 equal to the first MTPM one day after the operation. 
 
 ```{r}
 DATA$Month.f <- factor(DATA$FU.Months, levels = c(0,3,12,24,60))
@@ -569,7 +569,7 @@ The result from the performed t-test for the differences between type 1 and type
 
 
 **data transformation**
-# there are few differences in the residuals plot and qqplot of model17, so we do not consider data transformation 
+# there are few difference in the residuals plot and qqplot of model17, so we do not consider data transformation 
 ```{r}
 DATA$log_nM <- log(DATA$nMTPM + 1, base = 10)
 DATA$log_month <- log(DATA$FU.Months+1, base = 10)
@@ -798,16 +798,16 @@ qqnorm(model.5, ~ resid(., type = "p"), abline = c(0, 1))
 qqnorm(model17, ~ resid(., type = "p"), abline = c(0, 1))
 
 ```
-For normality,model.6 is better。
+For normality,model.6 is better.
 
 ```{r}
 plot(model.5, resid(., type = "p") ~ fitted(.),type = c("p", "smooth"), lwd = 3)
 
 plot(model17, resid(., type = "p") ~ fitted(.),type = c("p", "smooth"), lwd = 3)
 ```
-For assumption of zero mean, model17 is better
+For the assumption of zero mean, model17 is better.
 
-considering both the two assumptions above, we finally conclude that model17, which is the multivariate model, is prefered.
+Considering both the two assumptions above, we finally conclude that model17, which is the multivariate model, is prefered.
 ```{r}
 summary(model17)
 ```
