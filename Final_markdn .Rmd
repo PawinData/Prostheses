@@ -511,8 +511,8 @@ V <-vcov(model1)
 L <-c(0,1,0,1)
 type_2est <- c(L %*% betas)
 ses <- sqrt(L %*% V %*% L)
-type_2upp <-est + 1.96*ses
-type_2low <-est - 1.96*ses
+type_2upp <- type_2est + 1.96*ses
+type_2low <- type_2est - 1.96*ses
 type_2inter <- c(type_2low,type_2upp)
 type_2inter
 w.test2 <- wald.test(b = coef(model1),
