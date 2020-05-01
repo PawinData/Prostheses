@@ -157,5 +157,7 @@ DATA %>%
   filter(Type==2, Sex=="Female", BMI<24) %>%
   select(ID, Sex, BMI, Type, nMTPM, FU.Years)
 ```
+We also have an interactive 3D visualization of the data.[^2]
 
+[^2]:https://github.com/PawinData/Prostheses/blob/master/3D.html
 # 
