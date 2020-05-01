@@ -504,6 +504,7 @@ beta3inter <- c(beta3_low,beta3_upp)
 
 **c) Report the size of the migration change from 3 months to 1 year, 3 months to 2 years, 3 months to 5 years and change from 1 year to 5 year per operation type and make statistical inference. Given the corresponding 95% confidence interval and p-value.**
 
+```{r}
 modelq2 <- gls(nMTPM ~ FU.Months*Type.f,
                data = DATA,
                correlation = corCompSymm(form = ~ FU.Months | ID),
