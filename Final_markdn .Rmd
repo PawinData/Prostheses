@@ -659,10 +659,10 @@ anova(model..5,model..9) #model.5 is better
 getVarCov(model.5)
 
 #Between subject variation 
-bs <- getVarCov(model.5, type = "random.effects")  [1] #please check because i am not sure about this 
+bs <- getVarCov(model.5, type = "random.effects")  [1]  
 
 #Within subject variation 
-ws <- getVarCov(model.5, type ="conditional")[[1]][1,1] #please check because i am not sure about this  
+ws <- getVarCov(model.5, type ="conditional")[[1]][1,1] 
 
 # Marginal cov matrix 
 getVarCov(model.5, type = "marginal", ind = 2)
