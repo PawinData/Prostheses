@@ -417,6 +417,7 @@ anova(model17)
 ```{r}
 plot(model17, resid(., type = "p") ~ fitted(.),type = c("p", "smooth"), lwd = 3)
 ```
+From the above residual plot, we can see the errors follow the assumption of zero mean at each time point. However,there is a trend of points over time.
 
 **Standarized residuals per type** 
 ```{r}
@@ -482,32 +483,32 @@ For type 2 the larger difference in mean MTMP is between baseline and the first 
 **c) Report the size of the migration change from 3 months to 1 year, 3 months to 2 years, 3 months to 5 years and change from 1 year to 5 year per operation type and make statistical inference. Given the corresponding 95% confidence interval and p-value.**
 
 
-A:the astimated rate change in type1 group is 0.00798, and 95% intervar is(0.005115998 0.010844256)
+A:the estimated rate change in type1 group is 0.00798, and 95% intervar is(0.005115998 0.010844256)
 
 ```{r}
-model1 <- gls(nMTPM ~ FU.Months*Type.f,
+model18 <- gls(nMTPM ~ FU.Months*Type.f,
                data = DATA,
                correlation = corCompSymm(form = ~ FU.Months | ID),
                weights =  varExp(form = ~ FU.Months),
                na.action = na.exclude, method = "REML")
-summary(model1)
+summary(model18)
 
 #type 1 change rate
-type_1est <- summary(model1)$tTable["FU.Months","Value"]
+type_1est <- summary(model18)$tTable["FU.Months","Value"]
 type_1upp <- type_1est +
-        1.96*summary(model1)$tTable["FU.Months","Std.Error"] 
+        1.96*summary(model18)$tTable["FU.Months","Std.Error"] 
 type_1low <- type_1est -
-        1.96*summary(model1)$tTable["FU.Months","Std.Error"] 
+        1.96*summary(model18)$tTable["FU.Months","Std.Error"] 
 type_1inter <-c(type_1low, type_1upp)
 type_1inter
 library(aod)
-w.test1 <- wald.test(b = coef(model1),
-                     Sigma = vcov(model1),
+w.test1 <- wald.test(b = coef(model18),
+                     Sigma = vcov(model18),
                      L = rbind(c(0,1,0,0)))
 w.test1
 #type 2 change rate 
-betas <-coef(model1)
-V <-vcov(model1)
+betas <-coef(model18)
+V <-vcov(model18)
 L <-c(0,1,0,1)
 type_2est <- c(L %*% betas)
 ses <- sqrt(L %*% V %*% L)
@@ -515,8 +516,8 @@ type_2upp <- type_2est + 1.96*ses
 type_2low <- type_2est - 1.96*ses
 type_2inter <- c(type_2low,type_2upp)
 type_2inter
-w.test2 <- wald.test(b = coef(model1),
-                     Sigma = vcov(model1),
+w.test2 <- wald.test(b = coef(model18),
+                     Sigma = vcov(model18),
                      L = rbind(c(0,1,0,1)))
 w.test2
 #type 1 migration change
@@ -636,7 +637,7 @@ plot(model.8, resid(., type="n") ~ fitted(.)|Type.f,type = c("p", "smooth"), lwd
 plot(model.9, resid(., type="n") ~ fitted(.),type = c("p", "smooth"), lwd = 3)
 plot(model.9, resid(., type="n") ~ fitted(.)|Type.f,type = c("p", "smooth"), lwd = 3)
 ```
-The residual plot of model.5 violates the assumption of zero mean for errors. From the residual plot of model.8 and model.9, we can see there is a trend over time, so  model.8 and model.9 also do not persorm well for the zero mean assumption.
+The residual plot of model.5 violates the assumption of zero mean for errors. From the residual plot of model.8 and model.9, we can see the errors have zero mean, while there is a trend of points over time, so  model.8 and model.9 also do not persorm well for the zero mean assumption.
 
 
  
