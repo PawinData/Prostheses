@@ -564,7 +564,7 @@ Diff_type1 <-c(type_1m31,type_1m32,type_1m35,type_1m15)
 Diff_type2 <-c(type_2m31,type_2m32,type_2m35,type_2m15)
 t.test(Diff_type1 -Diff_type2)
 ```
-The result from the performed t-test for the differences between type 1 and type 2 is not significant (p-value = 0.05767). 
+The result from the performed t-test for the differences between type 1 and type 2 is not significant at 95% significance level(p-value = 0.05767). 
 
 
 **data transformation**
