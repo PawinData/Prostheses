@@ -447,7 +447,7 @@ t.test(nMTPM~Type.f,data = DATA, paired = TRUE)
 
 + Since we know that after operation some migration of the prosthesis is expected and stabilizes afterwards, we check how each type migrates differently from baseline to the first 3 months and after when we see the stabilization period from month 3 to 5 years after the operation. 
 
-``{r}
+```{r}
 #Type 1
 data1 <- filter(DATA, Type.f == "1")
 D1 <- data1[data1$Month.f == 0, "nMTPM"] - data1[data1$Month.f == 3, "nMTPM"]
