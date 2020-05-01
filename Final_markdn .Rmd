@@ -569,7 +569,7 @@ The result from the performed t-test for the differences between type 1 and type
 
 
 **data transformation**
-# there are few difference in the residuals plot and qqplot of model17, so we do not consider data transformation 
+# there are few differences in the residuals plot and qqplot of model17, so we do not consider data transformation 
 ```{r}
 DATA$log_nM <- log(DATA$nMTPM + 1, base = 10)
 DATA$log_month <- log(DATA$FU.Months+1, base = 10)
