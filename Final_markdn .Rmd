@@ -1,5 +1,5 @@
 ---
-title: 'Case Study: Prostheses'
+title: 'Case Study: Modelling the progression of migration in knee prostheses'
 author: 'Yuxuan LI (s2485265), Ariel Liang (s2614693), Yuying Tan (s2586401), María Zilli (s2261030)'
 date: "May 1st, 2020"
 output:
@@ -7,11 +7,16 @@ output:
 geometry: margin=0.8in
 fontsize: 12pt
 ---
-# Introduction
-The following 
-Maximum Total Point Motion (MTPM)
-For data preparation see Anex 1. 
 
+# Introduction 
+
+The following case study intends to analyse the data set from a longitudinal study on patients who had a knee operation, where a new knee protheses was tested. The outcome variable of the analysis is the Maximum Total Point Motion (MTPM) measured in mm. 
+The time frame from this data is between March 2009 and July 2010 from 60 patients, and 5 measurements were recorded: the first day after the surgery (taken as baseline for this analysis), then at 3 months, 1 year, 2 years and at 5 years postop- eratively. In addition to MTPM, the age, gender and the BMI of the patients is also recorded.
+
+A multivariate model and a linear mixed effects model are considered. 
+
+
+# Data preparation 
 
 ```{r}
 # define a function that look beforehead if come across NA values
@@ -97,18 +102,22 @@ if (sum(as.numeric(is.na(data)))==0)
 rm(data, id, k_row, row_na, row_na_list, a, b)
 ```
 
-# you may load the workspace prostheses.RData in case the codes failed 
+**The workspace made be loaded from prostheses.RData in case the codes failed**   
 load("prostheses.RData") 
+
+**The following libraries were used**
+
 require(pacman)
 library(lattice)
 library(lme4)
 library(nlme)
 library(ggplot2)
 
-```
+**The following variables were transformed for the anlysis:** 
 
-Transformation of the variable type of protheses to factor levels 1 and 2 
-Transformation of the variable Months into factor, the following analysis uses the variable Months instead of Years as its interpretation is easier. The baseline is considered to be month 0 equal to the first MTPM one day after the operation. 
++ Transformation of the variable type of protheses to factor levels 1 and 2 
++ Transformation of the variable Months into factor, the following analysis uses the variable Months instead of Years as its interpretation is easier. The baseline is considered to be month 0 equal to the first MTPM one day after the operation. 
+
 ```{r}
 DATA$Month.f <- factor(DATA$FU.Months, levels = c(0,3,12,24,60))
 DATA$Type.f <- factor(DATA$Type, levels = c(1,2))
@@ -232,7 +241,7 @@ p5+geom_smooth(method = lm )
 ```
 
 ##Conclusions
-From the spaghetti plots we can assume that there is a linear relationship between time and MTPM output variable. The exploratory analysis shows there are differences between the two types of protheses, and different migrations for men and women. 
+From the spaghetti plots we can assume that there is a linear relationship between time and MTPM output variable. The exploratory analysis shows there are differences between the two types of protheses, and different migrations for men and women, however this difference might be from the data itself. 
 
 # Q.2 Multivariate model 
 
@@ -259,7 +268,6 @@ anova(model1,model2)
 ```
 
 Model1 is better than model2, we prefer Unstructured model over (Semi-) Parametric model 
-*But then why we used after model 2 for the next section?, isn't it the other way since a unstructured is better for few follow ups? *
 
 **2.Select a correlation structure (same mean model but different covariance structures)**  
 
@@ -427,9 +435,8 @@ plot(model17, resid(., type="n") ~ fitted(.)|Type.f,type = c("p", "smooth"), lwd
 
 
 **a) Do both types migrate similarly over time?**
-+ The values taken at baseline are not significant since the MTMP was measured 1 day after the operation,therefore there is no change.
-+ No, the protheses type do not migrate similarly over time. The mean change MTMP increases from month 3 to 60 months (5 years) after the operation for the prothesis type 1. While the mean MTMP for type 2 increases from baseline to 3 months, but it decreases from year 1 to year 5. 
-*is there a lot of data lost from the patients for type 2 for the last measurement? 
++ The values taken at baseline are not significant since the MTMP was measured 1 day after the operation,therefore there is no change of MTMP. 
++ The protheses types do not migrate similarly over time. Even though the general trend is an increase in MTPM for the first three months and after a stabilization, there are differences. For type 1, the mean for MTMP shows an increase from baseline until 5 years, and for type 2 there is an increase from baseline to the 3 months measurement and after a stabilization. The increase from baseline to 3 months is more significant for type 2. 
 
 **b) Report the differences in the mean migration between the two operation types at each time point**
 **Intervals for 95% confidence level**
@@ -437,11 +444,46 @@ plot(model17, resid(., type="n") ~ fitted(.)|Type.f,type = c("p", "smooth"), lwd
 ```{r}
 intervals(model17)
 ```
+For type 1 the larger differences are between baseline and 3 months and from 3 months to 1 year after the operation, after this there is a mean increase of MTMP but it is more steady. 
+
+For type 2 the larger difference in mean MTMP is between baseline and the first 3 months, after there is a slight decrease in MTMP. 
 
 **c) Report the size of the migration change from 3 months to 1 year, 3 months to 2 years, 3 months to 5 years and change from 1 year to 5 year pero operation type and make statistical inference. Given the corresponding 95% confidence interval and p-value.**
 
+For this we estimate the difference for each period separately with a t.test for each period 
+
+```{r}
+t.test(nMTPM ~ Type.f, data = DATA, subset = which (DATA$FU.Months== 0), paired =FALSE)
+t.test(nMTPM ~ Type.f, data = DATA, subset = which (DATA$FU.Months== 3), paired =FALSE)
+t.test(nMTPM ~ Type.f, data = DATA, subset = which (DATA$FU.Months== 12), paired =FALSE)
+t.test(nMTPM ~ Type.f, data = DATA, subset = which (DATA$FU.Months== 24), paired =FALSE)
+t.test(nMTPM ~ Type.f, data = DATA, subset = which (DATA$FU.Months== 60), paired =FALSE)
+```
+
+The p-values for each t test are significant except for the baseline which is one day after the operation. The type of protheses is statistically significant at all other periods separately. 
+
+```{r}
+#Type 1
+data1 <- filter(DATA, Type.f == "1")
+D1 <- data1[data1$Month.f == 3, "nMTPM"] - data1[data1$Month.f == 60, "nMTPM"]
+
+#Type 2
+data2 <- filter(DATA, Type.f == "2")
+D2 <- data2[data2$Month.f == 3, "nMTPM"] - data2[data2$Month.f == 60, "nMTPM"]
+
+ t.test(x =D1, y= NULL)
+ 
+ t.test(x =D2, y= NULL)
+ 
+```
+For type 1 the difference between 
 
 **d) Are these changes different between the two types? Give the corresponding 95% confidence interval and p-value**
+
+Since we know there is a more significant increase in the first three months and after a more steady increase or constant migrantion, let us compare the differences in these periods for each type. 
+
+
+
 
 
 # Q.3 Linear Mixed-effects model
